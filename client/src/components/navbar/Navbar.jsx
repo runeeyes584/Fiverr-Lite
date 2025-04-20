@@ -21,11 +21,7 @@ function Navbar() {
 
   // const currentUser = null
 
-  const currentUser = {
-    id: 1,
-    username: "Anna",
-    isSeller: true,
-  };
+  const currentUser = null;
 
   return (
     <div className={active || pathname !== "/" ? "navbar active" : "navbar"}>
@@ -72,7 +68,9 @@ function Navbar() {
             </div>
           ) : (
             <>
-              <span>Sign in</span>
+              <Link className="link hover-text" to="/login">
+                <span>Sign in</span>
+              </Link>
               <Link className="link" to="/register">
                 <button>Join</button>
               </Link>

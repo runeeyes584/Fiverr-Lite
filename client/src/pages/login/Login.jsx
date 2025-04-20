@@ -4,7 +4,9 @@ import "./Login.scss"
 
 function Login() {
   return (
-    <SignIn />
+    <div className="mid">
+      <SignIn />
+    </div>
   )
 }
 

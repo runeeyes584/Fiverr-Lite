@@ -4,7 +4,7 @@ import "./Register.scss"
 
 function Register() {
   return (
-    <div className="center">
+    <div className="mid">
       <SignUp /> 
     </div>
   )
