@@ -1,9 +1,12 @@
+import { SignUp } from "@clerk/clerk-react"
 import React from "react"
 import "./Register.scss"
 
 function Register() {
   return (
-    <div>Register</div>
+    <div className="center">
+      <SignUp /> 
+    </div>
   )
 }
 
