@@ -1,3 +1,4 @@
+import { SignOutButton, useAuth, useUser } from "@clerk/clerk-react";
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import "./Navbar.scss";
@@ -7,6 +8,8 @@ function Navbar() {
   const [open, setOpen] = useState(false);
 
   const { pathname } = useLocation();
+  const { isSignedIn, user } = useUser(); // Lấy thông tin user từ Clerk
+  const { userId } = useAuth(); // Lấy userId từ Clerk
 
   const isActive = () => {
     window.scrollY > 0 ? setActive(true) : setActive(false);
@@ -19,9 +22,15 @@ function Navbar() {
     };
   }, []);
 
-  // const currentUser = null
-
-  const currentUser = null;
+  // currentUser sẽ được lấy từ Clerk
+  const currentUser = isSignedIn
+    ? {
+        id: userId,
+        username: user?.username || user?.firstName || user?.emailAddresses[0].emailAddress.split("@")[0],
+        isSeller: user?.publicMetadata?.isSeller || false,
+        avatar: user?.imageUrl || "https://images.pexels.com/photos/1115697/pexels-photo-1115697.jpeg?auto=compress&cs=tinysrgb&w=1600",
+      }
+    : null;
 
   return (
     <div className={active || pathname !== "/" ? "navbar active" : "navbar"}>
@@ -38,33 +47,34 @@ function Navbar() {
           <span>English</span>
           {!currentUser?.isSeller && <span>Become a Seller</span>}
           {currentUser ? (
-            <div className="user" onClick={()=>setOpen(!open)}>
-              <img
-                src="https://images.pexels.com/photos/1115697/pexels-photo-1115697.jpeg?auto=compress&cs=tinysrgb&w=1600"
-                alt=""
-              />
-              <span>{currentUser?.username}</span>
-              {open && <div className="options">
-                {currentUser.isSeller && (
-                  <>
-                    <Link className="link" to="/mygigs">
-                      Gigs
+            <div className="user" onClick={() => setOpen(!open)}>
+              <img src={currentUser.avatar} alt="" />
+              <span>{currentUser.username}</span>
+              {open && (
+                <div className="options">
+                  {currentUser.isSeller && (
+                    <>
+                      <Link className="link" to="/mygigs">
+                        Gigs
+                      </Link>
+                      <Link className="link" to="/add">
+                        Add New Gig
+                      </Link>
+                    </>
+                  )}
+                  <Link className="link" to="/orders">
+                    Orders
+                  </Link>
+                  <Link className="link" to="/messages">
+                    Messages
+                  </Link>
+                  <SignOutButton>
+                    <Link className="link" to="/">
+                      Logout
                     </Link>
-                    <Link className="link" to="/add">
-                      Add New Gig
-                    </Link>
-                  </>
-                )}
-                <Link className="link" to="/orders">
-                  Orders
-                </Link>
-                <Link className="link" to="/messages">
-                  Messages
-                </Link>
-                <Link className="link" to="/">
-                  Logout
-                </Link>
-              </div>}
+                  </SignOutButton>
+                </div>
+              )}
             </div>
           ) : (
             <>

@@ -19,7 +19,7 @@ const db = mysql.createConnection({
   host: 'localhost',   // Địa chỉ máy chủ MySQL
   user: 'root',        // Tên đăng nhập MySQL
   password: '10022004',  // Mật khẩu MySQL
-  database: 'sys',  // Tên cơ sở dữ liệu bạn muốn kết nối
+  database: 'jobSearch_new',  // Tên cơ sở dữ liệu bạn muốn kết nối
   port: 3306,  // Cổng mặc định của MySQL
   multipleStatements: true // Cho phép thực thi nhiều câu lệnh SQL
 });
