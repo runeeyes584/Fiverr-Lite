@@ -1,20 +1,22 @@
-import "./app.scss";
-import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import React from "react";
-import Navbar from "./components/navbar/Navbar";
+import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
+import "./app.scss";
 import Footer from "./components/footer/Footer";
-import Home from "./pages/home/Home";
-import Gigs from "./pages/gigs/Gigs";
-import Gig from "./pages/gig/Gig";
-import Login from "./pages/login/Login";
-import Register from "./pages/register/Register";
+import Navbar from "./components/navbar/Navbar";
+import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import Add from "./pages/add/Add";
-import Orders from "./pages/orders/Orders";
-import Messages from "./pages/messages/Messages";
+import AdminDashboard from "./pages/admin/adminDashboard";
+import ErrorPage from "./pages/error/Error";
+import Gig from "./pages/gig/Gig";
+import Gigs from "./pages/gigs/Gigs";
+import Home from "./pages/home/Home";
+import Login from "./pages/login/Login";
 import Message from "./pages/message/Message";
+import Messages from "./pages/messages/Messages";
 import MyGigs from "./pages/myGigs/MyGigs";
-
-
+import Orders from "./pages/orders/Orders";
+import Profile from "./pages/profile/Profile";
+import Register from "./pages/register/Register";
 
 function App() {
   const Layout = () => {
@@ -31,18 +33,31 @@ function App() {
     {
       path: "/",
       element: <Layout />,
+      errorElement: <ErrorPage />,
       children: [
         {
           path: "/",
           element: <Home />,
         },
         {
+          path: "/profile/",
+          element: <Profile />,
+        },
+        {
           path: "/gigs",
-          element: <Gigs />,
+          element: (
+            <ProtectedRoute requiredRole="seller">
+              <Gigs />
+            </ProtectedRoute>
+          ),
         },
         {
           path: "/myGigs",
-          element: <MyGigs />,
+          element: (
+            <ProtectedRoute requiredRole="seller">
+              <MyGigs />
+            </ProtectedRoute>
+          ),
         },
         {
           path: "/orders",
@@ -63,6 +78,18 @@ function App() {
         {
           path: "/gig/:id",
           element: <Gig />,
+        },
+        {
+          path: "/admin",
+          element: (
+            <ProtectedRoute requiredRole="admin">
+              <AdminDashboard />
+            </ProtectedRoute>
+          ), 
+        },
+        {
+          path: "*",
+          element: <ErrorPage />,
         },
       ],
     },

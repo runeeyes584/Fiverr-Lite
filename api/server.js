@@ -1,3 +1,4 @@
+import { Clerk } from "@clerk/clerk-sdk-node";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -13,6 +14,8 @@ import userRoute from "./routes/user.route.js";
 
 const app = express();
 dotenv.config();
+
+const clerk = new Clerk({ apiKey: process.env.CLERK_SECRET_KEY });
 
 // Cấu hình kết nối MySQL
 const db = mysql.createConnection({
@@ -50,6 +53,16 @@ app.use((err, req, res, next) => {
   const errorMessage = err.message || "Something went wrong!";
 
   return res.status(errorStatus).send(errorMessage);
+});
+
+app.get("/api/users", async (req, res) => {
+  try {
+    const users = await clerk.users.getUserList();
+    res.status(200).json(users);
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách người dùng:", error);
+    res.status(500).json({ error: "Lỗi server khi lấy danh sách người dùng" });
+  }
 });
 
 app.listen(8800, () => {

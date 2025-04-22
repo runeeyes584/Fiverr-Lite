@@ -28,6 +28,7 @@ function Navbar() {
         id: userId,
         username: user?.username || user?.firstName || user?.emailAddresses[0].emailAddress.split("@")[0],
         isSeller: user?.publicMetadata?.isSeller || false,
+        isAdmin: user?.publicMetadata?.isAdmin || false,
         avatar: user?.imageUrl || "https://images.pexels.com/photos/1115697/pexels-photo-1115697.jpeg?auto=compress&cs=tinysrgb&w=1600",
       }
     : null;
@@ -45,13 +46,16 @@ function Navbar() {
           <span>Liverr Business</span>
           <span>Explore</span>
           <span>English</span>
-          {!currentUser?.isSeller && <span>Become a Seller</span>}
+          {!currentUser?.isSeller && !currentUser?.isAdmin && <span>Become a Seller</span>}
           {currentUser ? (
             <div className="user" onClick={() => setOpen(!open)}>
               <img src={currentUser.avatar} alt="" />
               <span>{currentUser.username}</span>
               {open && (
                 <div className="options">
+                  <Link className="link" to="/profile">
+                    <span>Profile</span>
+                  </Link>
                   {currentUser.isSeller && (
                     <>
                       <Link className="link" to="/mygigs">
@@ -59,6 +63,13 @@ function Navbar() {
                       </Link>
                       <Link className="link" to="/add">
                         Add New Gig
+                      </Link>
+                    </>
+                  )}
+                  {currentUser.isAdmin && (
+                    <>
+                      <Link className="link" to="/admin">
+                        Admin Dashboard
                       </Link>
                     </>
                   )}
