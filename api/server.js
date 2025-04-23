@@ -28,7 +28,7 @@ const db = mysql.createConnection({
 });
 
 // Kết nối MySQL
-db.connect((err) => {
+export db.connect((err) => {
   if (err) {
     console.error('Lỗi kết nối MySQL:', err.stack);
     return;
