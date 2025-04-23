@@ -18,7 +18,7 @@ dotenv.config();
 const clerk = new Clerk({ apiKey: process.env.CLERK_SECRET_KEY });
 
 // Cấu hình kết nối MySQL
-const db = mysql.createConnection({
+export const db = mysql.createConnection({
   host: 'localhost',   // Địa chỉ máy chủ MySQL
   user: 'root',        // Tên đăng nhập MySQL
   password: '10022004',  // Mật khẩu MySQL
@@ -28,7 +28,7 @@ const db = mysql.createConnection({
 });
 
 // Kết nối MySQL
-export db.connect((err) => {
+db.connect((err) => {
   if (err) {
     console.error('Lỗi kết nối MySQL:', err.stack);
     return;
