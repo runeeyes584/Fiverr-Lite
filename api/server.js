@@ -1,4 +1,4 @@
-import { Clerk } from "@clerk/clerk-sdk-node";
+import { Clerk, verifyToken } from "@clerk/clerk-sdk-node";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -12,8 +12,11 @@ import orderRoute from "./routes/order.route.js";
 import reviewRoute from "./routes/review.route.js";
 import userRoute from "./routes/user.route.js";
 
+
 const app = express();
 dotenv.config();
+
+app.use(cookieParser())
 
 const clerk = new Clerk({ apiKey: process.env.CLERK_SECRET_KEY });
 
@@ -41,7 +44,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/api/auth", authRoute);
-app.use("/api/users", userRoute);
+app.use("/api/users", userRoute, verifyToken);
 app.use("/api/gigs", gigRoute);
 app.use("/api/orders", orderRoute);
 app.use("/api/conversations", conversationRoute);
