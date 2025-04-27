@@ -1,4 +1,4 @@
-// Metadata của bảng user_account
+
 const UserModel = {
   tableName: "user_account",
   columns: {
