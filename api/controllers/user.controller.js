@@ -42,9 +42,6 @@ export const handleClerkWebhook = async (req, res) => {
         return res.status(400).json({ success: false, message: err.message });
     }
 
-    // --- Kết thúc: Xác minh chữ ký Webhook ---
-
-
     // --- Bắt đầu: Xử lý sự kiện dựa trên loại ---
     try {
         const { id } = evt.data; // id ở đây là clerk_id
@@ -118,7 +115,6 @@ export const handleClerkWebhook = async (req, res) => {
                 res.status(200).json({ success: true, message: "Webhook xử lý và cập nhật DB thành công" });
             });
         }
-        // --- Kết thúc Logic User Create / Update ---
 
         // --- Logic xử lý sự kiện User Delete ---
         else if (eventType === 'user.deleted') {
@@ -150,20 +146,15 @@ export const handleClerkWebhook = async (req, res) => {
                 res.status(200).json({ success: true, message: 'Webhook nhận (sự kiện xóa không cần hành động).' });
             }
         }
-        // --- Kết thúc Logic User Delete ---
 
         // --- Xử lý các loại sự kiện khác (nếu cần) ---
         else {
             console.log(`Webhook Controller: Bỏ qua sự kiện chưa xử lý: ${eventType}`);
             res.status(200).json({ success: true, message: 'Webhook nhận (sự kiện không cần xử lý).' });
         }
-        // --- Kết thúc: Xử lý sự kiện dựa trên loại ---
 
     } catch (err) {
-        // Bắt lỗi chung trong quá trình xử lý sự kiện (sau khi xác minh)
         console.error('Lỗi Webhook Controller (Event Handling):', err.message);
-        // Trả về 500 hoặc 200 tùy theo chiến lược xử lý lỗi của bạn
-        // Trả về 200 thường an toàn hơn để tránh Clerk retry vì lỗi logic phía bạn
         res.status(200).send('Acknowledged (Lỗi xử lý phía máy chủ)');
     }
 };
