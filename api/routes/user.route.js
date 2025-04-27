@@ -1,11 +1,15 @@
-import express from "express";
-import { deleteUser, getUser } from "../controllers/user.controller.js";
-import { verifyToken } from "../middleware/jwt.js";
+
+import express from 'express';
+import { handleClerkWebhook } from '../controllers/user.controller.js';
 
 const router = express.Router();
 
-router.delete("/:id", verifyToken, deleteUser);
-router.get("/:id", getUser);
+router.post(
+    '/',
+    express.raw({ type: 'application/json' }),
+     // Sử dụng express.raw tích hợp sẵn
+    handleClerkWebhook
+);
 
 export default router;
 // Tiến bị ngu
