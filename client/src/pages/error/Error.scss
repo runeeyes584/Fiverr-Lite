@@ -1,54 +1,131 @@
-.page_404{ 
-  padding:40px 0 !important; 
-  background:#fff; 
-  font-family: 'Arvo', serif !important;
+.page_404 {
+  padding: 40px 0;
+  background: #fff;
+  font-family: 'Arvo', serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
 }
 
-.page_404 img{ 
-  width:100%;
+.four_zero_four_bg {
+  background-image: url(https://cdn.dribbble.com/users/285475/screenshots/2083086/dribbble_1.gif);
+  height: 450px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  width: 800px;
 }
 
-.four_zero_four_bg{
- 
-    background-image: url(https://cdn.dribbble.com/users/285475/screenshots/2083086/dribbble_1.gif);
-    height: 400px;
-    background-position: center;
-    background-repeat: no-repeat;
- }
- 
- 
- .four_zero_four_bg h1{
- font-size:80px;
- }
- 
-.four_zero_four_bg h3{
-	font-size:80px;
+.four_zero_four_bg h1 {
+  font-size: 80px;
+  margin: 0;
+  padding-top: 20px;
 }
-			 
-.link_404
-{			 
-	  color: #fff!important;
-    padding: 10px 20px;
-    background: #39ac31;
-    margin: 20px 0;
-    display: inline-block;
-    text-decoration: none;
-    border-radius: 5px;
-  }
 
-.link_404:hover
-{			 
+.contant_box_404 {
+  margin-top: -50px;
+  text-align: center;
+}
+
+.contant_box_404 .h2 {
+   font-size: 1.8rem;
+}
+
+.contant_box_404 p {
+   font-size: 1rem;
+   margin-top: 10px;
+}
+
+
+.link_404 {
+  color: #fff !important;
+  padding: 10px 20px;
+  background: #39ac31;
+  margin: 20px 0;
+  display: inline-block;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.link_404:hover {
   background: #1a6215;
 }
 
-.contant_box_404
-{ 
-  margin-top:-50px;
-}
-
-.text-center{
+.text-center {
   text-align: center;
 }
+
+
+@media (max-width: 991.98px) {
+  .page_404 {
+    padding: 30px 0;
+  }
+  .four_zero_four_bg {
+    height: 300px;
+  }
+  .four_zero_four_bg h1 {
+    font-size: 60px;
+  }
+  .contant_box_404 {
+    margin-top: -40px;
+  }
+   .contant_box_404 .h2 {
+     font-size: 1.6rem;
+   }
+}
+
+
+@media (max-width: 767.98px) {
+  .page_404 {
+    padding: 20px 0;
+     min-height: 70vh;
+  }
+  .four_zero_four_bg {
+    height: 250px;
+  }
+  .four_zero_four_bg h1 {
+    font-size: 50px;
+  }
+  .contant_box_404 {
+    margin-top: -30px;
+  }
+  .contant_box_404 .h2 {
+     font-size: 1.4rem;
+   }
+   .contant_box_404 p {
+     font-size: 0.9rem;
+   }
+   .link_404 {
+      padding: 8px 15px;
+      margin: 15px 0;
+   }
+}
+
+
+@media (max-width: 575.98px) {
+  .page_404 {
+    padding: 15px 0;
+  }
+  .four_zero_four_bg {
+    height: 200px;
+    background-size: contain;
+  }
+  .four_zero_four_bg h1 {
+    font-size: 40px;
+  }
+  .contant_box_404 {
+    margin-top: -25px;
+  }
+  .contant_box_404 .h2 {
+     font-size: 1.2rem;
+   }
+   .contant_box_404 p {
+     font-size: 0.85rem;
+   }
+}
+
 
 .margin-top{
   margin-top: 10px;

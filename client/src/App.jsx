@@ -4,6 +4,7 @@ import "./app.scss";
 import Footer from "./components/footer/Footer";
 import Navbar from "./components/navbar/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
+import ScrollToTop from "./components/scrollTop/ScrollTop";
 import Add from "./pages/add/Add";
 import AdminDashboard from "./pages/admin/adminDashboard";
 import ErrorPage from "./pages/error/Error";
@@ -23,6 +24,7 @@ function App() {
     return (
       <div className="app">
         <Navbar />
+        <ScrollToTop />
         <Outlet />
         <Footer />
       </div>
