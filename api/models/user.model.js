@@ -1,92 +1,94 @@
+import { DataTypes } from "sequelize";
 
-const UserModel = {
-  tableName: "user_account",
-  columns: {
-    id: {
-      type: "INT",
-      autoIncrement: true,
-      primaryKey: true,
-    },
-    clerk_id: {
-      type: "VARCHAR(255)",
-      allowNull: false,
-      unique: true,
-    },
-    user_type_id: {
-      type: "INT",
-      allowNull: false,
-      references: {
-        table: "user_type",
-        key: "id",
+const User = (sequelize) =>
+  sequelize.define(
+    "User",
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+      },
+      clerk_id: {
+        type: DataTypes.STRING(255),
+        allowNull: false,
+        unique: true,
+      },
+      user_type_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
+      email: {
+        type: DataTypes.STRING(255),
+        allowNull: false,
+        unique: true,
+        validate: {
+          isEmail: true,
+        },
+      },
+      username: {
+        type: DataTypes.STRING(50),
+        allowNull: false,
+        unique: true,
+      },
+      country: {
+        type: DataTypes.STRING(50),
+        allowNull: false,
+      },
+      description: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
+      is_seller: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+      created_at: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: sequelize.literal("CURRENT_TIMESTAMP"),
+      },
+      updated_at: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: sequelize.literal("CURRENT_TIMESTAMP"),
+        onUpdate: sequelize.literal("CURRENT_TIMESTAMP"),
+      },
+      date_of_birth: {
+        type: DataTypes.DATEONLY,
+        allowNull: true,
+      },
+      gender: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      is_active: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+      },
+      contact_number: {
+        type: DataTypes.STRING(20),
+        allowNull: true,
+      },
+      user_image: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
+      registration_date: {
+        type: DataTypes.DATEONLY,
+        allowNull: false,
+      },
+      last_password_updated: {
+        type: DataTypes.DATE,
+        allowNull: true,
       },
     },
-    email: {
-      type: "VARCHAR(255)",
-      allowNull: false,
-      unique: true,
-      validate: {
-        is: /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/,
-      },
-    },
-    username: {
-      type: "VARCHAR(50)",
-      allowNull: false,
-      unique: true,
-    },
-    country: {
-      type: "VARCHAR(50)",
-      allowNull: false,
-    },
-    description: {
-      type: "TEXT",
-      allowNull: true,
-    },
-    is_seller: {
-      type: "TINYINT(1)",
-      allowNull: false,
-      defaultValue: 0,
-    },
-    created_at: {
-      type: "DATETIME",
-      allowNull: false,
-      defaultValue: "CURRENT_TIMESTAMP",
-    },
-    updated_at: {
-      type: "DATETIME",
-      allowNull: false,
-      defaultValue: "CURRENT_TIMESTAMP",
-      onUpdate: "CURRENT_TIMESTAMP",
-    },
-    date_of_birth: {
-      type: "DATE",
-      allowNull: true,
-    },
-    gender: {
-      type: "TINYINT(1)",
-      allowNull: true,
-    },
-    is_active: {
-      type: "TINYINT(1)",
-      allowNull: false,
-      defaultValue: 1,
-    },
-    contact_number: {
-      type: "VARCHAR(20)",
-      allowNull: true,
-    },
-    user_image: {
-      type: "TEXT",
-      allowNull: true,
-    },
-    registration_date: {
-      type: "DATE",
-      allowNull: false,
-    },
-    last_password_updated: {
-      type: "DATETIME",
-      allowNull: true,
-    },
-  },
-};
+    {
+      tableName: "user_account",
+      timestamps: false,
+    }
+  );
 
-export default UserModel;
+export default User;

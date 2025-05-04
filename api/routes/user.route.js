@@ -1,15 +1,27 @@
 
 import express from 'express';
 import { handleClerkWebhook } from '../controllers/user.controller.js';
+import { models } from "../models/mySQL-db.js";
 
 const router = express.Router();
-
+// Webhook từ Clerk
 router.post(
     '/',
     express.raw({ type: 'application/json' }),
      // Sử dụng express.raw tích hợp sẵn
     handleClerkWebhook
 );
+
+router.get("/", async (req, res, next) => {
+    try {
+      const users = await models.User.findAll();
+      res.status(200).json(users);
+    } catch (err) {
+      next(err);
+    }
+  });
+
+
 
 export default router;
 // Tiến bị ngu
