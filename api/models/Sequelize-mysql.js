@@ -1,6 +1,6 @@
-import { Sequelize, DataTypes } from "sequelize";
 import dotenv from "dotenv";
 import path from "path";
+import { Sequelize } from "sequelize";
 import { fileURLToPath } from "url";
 import models from "./index.js";
 
@@ -13,7 +13,7 @@ const sequelize = new Sequelize({
   dialect: "mysql",
   host: process.env.DB_HOST || "localhost",
   username: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "151004abyss",
+  password: process.env.DB_PASSWORD || "10022004",
   database: process.env.DB_NAME || "fiverr_new",
   port: 3306,
 });
@@ -144,4 +144,4 @@ initializedModels.GigView.afterCreate(async (gigView, options) => {
   );
 });
 
-export { sequelize, initializedModels as models };
+export { initializedModels as models, sequelize };

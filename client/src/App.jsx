@@ -18,6 +18,7 @@ import MyGigs from "./pages/myGigs/MyGigs";
 import Orders from "./pages/orders/Orders";
 import Profile from "./pages/profile/Profile";
 import Register from "./pages/register/Register";
+import SelectRole from "./pages/selectRole/SelectRole";
 
 function App() {
   const Layout = () => {
@@ -103,6 +104,10 @@ function App() {
       path: "/login",
       element: <Login />,
     },
+    {
+      path: "/selectRole",
+      element: <SelectRole />,
+    }
   ]);
 
   return <RouterProvider router={router} />;

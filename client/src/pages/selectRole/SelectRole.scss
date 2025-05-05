@@ -1,0 +1,124 @@
+@use "sass:color";
+
+$background-color: #eaf2f8;
+$container-bg: #ffffff;
+$card-bg: #f8f9fa;
+$card-border: #e9ecef;
+$card-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+$selected-border-color: #007bff;
+$selected-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+$text-color-primary: #212529;
+$text-color-secondary: #6c757d;
+$button-bg: #007bff;
+$button-text-color: #ffffff;
+$border-radius: 12px;
+
+.select-role-wrapper {
+    display: flex;             
+    justify-content: center; 
+    align-items: center;    
+    min-height: 100vh;       
+    width: 100%;           
+    box-sizing: border-box;  
+    background-color: #e7f0fe;
+    overflow: hidden
+}
+
+.select-role-container {
+  background-color: $container-bg;
+  padding: 40px 50px;
+  border-radius: $border-radius;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 600px;
+  width: 100%;
+
+  h1 {
+    color: $text-color-primary;
+    margin-bottom: 10px;
+    font-size: 1.8rem;
+  }
+
+  p.subtitle {
+    color: $text-color-secondary;
+    margin-bottom: 35px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    max-width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+.role-options {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.role-option {
+  background-color: $card-bg;
+  border: 1px solid $card-border;
+  border-radius: $border-radius;
+  padding: 25px 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: $card-shadow;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 150px;
+
+  .icon-placeholder {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    color: $text-color-secondary;
+  }
+
+  span {
+    font-weight: 600;
+    color: $text-color-primary;
+    font-size: 1rem;
+  }
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  &.selected {
+    border-color: $selected-border-color;
+    box-shadow: $selected-shadow;
+    background-color: color.adjust($selected-border-color, $lightness: 38%);
+
+    .icon-placeholder {
+       color: $selected-border-color;
+    }
+
+    span {
+        color: $selected-border-color;
+    }
+  }
+}
+
+.continue-button {
+  background-color: $button-bg;
+  color: $button-text-color;
+  border: none;
+  padding: 12px 40px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: $border-radius * 2;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: color.adjust($button-bg, $lightness: -10%);
+  }
+
+  &:disabled {
+    background-color: color.adjust($button-bg, $lightness: 20%);
+    cursor: not-allowed;
+  }
+}

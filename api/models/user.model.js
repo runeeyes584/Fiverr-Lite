@@ -25,11 +25,6 @@ const User = (sequelize) =>
         type: DataTypes.TEXT,
         allowNull: true,
       },
-      is_seller: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: false,
-      },
       user_role: {
         type: DataTypes.ENUM("seeker", "employer", "admin"),
         allowNull: false,
