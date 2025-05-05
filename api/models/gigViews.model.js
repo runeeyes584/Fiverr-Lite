@@ -1,40 +1,40 @@
 import { DataTypes } from "sequelize";
 
-const Conversation = (sequelize) =>
+const GigView = (sequelize) =>
   sequelize.define(
-    "Conversation",
+    "GigView",
     {
       id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
       },
-      sender_clerk_id: {
-        type: DataTypes.STRING(255),
+      gig_id: {
+        type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: "user_account",
-          key: "clerk_id",
-        },
+            model: "gigs",
+            key: "id",
+          },
       },
-      receiver_clerk_id: {
+      clerk_id: {
         type: DataTypes.STRING(255),
-        allowNull: false,
+        allowNull: true,
         references: {
-          model: "user_account",
-          key: "clerk_id",
-        },
+            model: "user_account",
+            key: "clerk_id",
+          },
       },
-      created_at: {
+      view_date: {
         type: DataTypes.DATE,
         allowNull: false,
         defaultValue: DataTypes.NOW,
       },
     },
     {
-      tableName: "conversation",
+      tableName: "gig_views",
       timestamps: false,
     }
   );
 
-export default Conversation;
+export default GigView;

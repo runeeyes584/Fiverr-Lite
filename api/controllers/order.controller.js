@@ -65,7 +65,7 @@
 // // Tiến bị ngu
 
 import createError from "../utils/createError.js";
-import { models } from "../models/mySQL-db.js";
+import { models } from "../models/Sequelize-mysql.js";
 import Stripe from "stripe";
 
 export const intent = async (req, res, next) => {

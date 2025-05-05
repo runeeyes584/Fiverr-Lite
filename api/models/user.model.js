@@ -13,23 +13,9 @@ const User = (sequelize) =>
         type: DataTypes.STRING(255),
         allowNull: false,
         unique: true,
-      },
-      user_type_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-      },
-      email: {
-        type: DataTypes.STRING(255),
-        allowNull: false,
-        unique: true,
         validate: {
-          isEmail: true,
+          is: /^[A-Za-z0-9_-]+$/,
         },
-      },
-      username: {
-        type: DataTypes.STRING(50),
-        allowNull: false,
-        unique: true,
       },
       country: {
         type: DataTypes.STRING(50),
@@ -44,45 +30,26 @@ const User = (sequelize) =>
         allowNull: false,
         defaultValue: false,
       },
-      created_at: {
-        type: DataTypes.DATE,
+      user_role: {
+        type: DataTypes.ENUM("seeker", "employer", "admin"),
         allowNull: false,
-        defaultValue: sequelize.literal("CURRENT_TIMESTAMP"),
-      },
-      updated_at: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: sequelize.literal("CURRENT_TIMESTAMP"),
-        onUpdate: sequelize.literal("CURRENT_TIMESTAMP"),
+        defaultValue: "seeker",
       },
       date_of_birth: {
         type: DataTypes.DATEONLY,
         allowNull: true,
       },
       gender: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.TINYINT,
         allowNull: true,
-      },
-      is_active: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: true,
       },
       contact_number: {
         type: DataTypes.STRING(20),
         allowNull: true,
       },
-      user_image: {
-        type: DataTypes.TEXT,
-        allowNull: true,
-      },
       registration_date: {
         type: DataTypes.DATEONLY,
         allowNull: false,
-      },
-      last_password_updated: {
-        type: DataTypes.DATE,
-        allowNull: true,
       },
     },
     {

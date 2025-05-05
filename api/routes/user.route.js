@@ -1,7 +1,7 @@
 
 import express from 'express';
 import { handleClerkWebhook } from '../controllers/user.controller.js';
-import { models } from "../models/mySQL-db.js";
+import { models } from "../models/Sequelize-mysql.js";
 
 const router = express.Router();
 // Webhook từ Clerk

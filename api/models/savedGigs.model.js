@@ -1,15 +1,15 @@
 import { DataTypes } from "sequelize";
 
-const Conversation = (sequelize) =>
+const SavedGig = (sequelize) =>
   sequelize.define(
-    "Conversation",
+    "SavedGig",
     {
       id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
       },
-      sender_clerk_id: {
+      clerk_id: {
         type: DataTypes.STRING(255),
         allowNull: false,
         references: {
@@ -17,24 +17,30 @@ const Conversation = (sequelize) =>
           key: "clerk_id",
         },
       },
-      receiver_clerk_id: {
-        type: DataTypes.STRING(255),
+      gig_id: {
+        type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: "user_account",
-          key: "clerk_id",
+          model: "gigs",
+          key: "id",
         },
       },
-      created_at: {
-        type: DataTypes.DATE,
+      saved_date: {
+        type: DataTypes.DATEONLY,
         allowNull: false,
         defaultValue: DataTypes.NOW,
       },
     },
     {
-      tableName: "conversation",
+      tableName: "saved_gigs",
       timestamps: false,
+      indexes: [
+        {
+          unique: true,
+          fields: ["clerk_id", "gig_id"],
+        },
+      ],
     }
   );
 
-export default Conversation;
+export default SavedGig;

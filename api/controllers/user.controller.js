@@ -160,7 +160,7 @@
 // };
 
 import { Webhook } from "svix";
-import { models } from "../models/mySQL-db.js";
+import { models } from "../models/Sequelize-mysql.js";
 
 export const handleClerkWebhook = async (req, res) => {
   // Xác minh chữ ký Webhook

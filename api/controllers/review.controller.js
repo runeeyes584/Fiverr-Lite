@@ -53,8 +53,8 @@
 // };
 
 import createError from "../utils/createError.js";
-import { models } from "../models/mySQL-db.js";
-import { sequelize } from "../models/mySQL-db.js";
+import { models } from "../models/Sequelize-mysql.js";
+import { sequelize } from "../models/Sequelize-mysql.js";
 
 export const createReview = async (req, res, next) => {
   if (req.isSeller)

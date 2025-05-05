@@ -60,7 +60,7 @@
 // };
 
 import createError from "../utils/createError.js";
-import { models } from "../models/mySQL-db.js";
+import { models } from "../models/Sequelize-mysql.js";
 
 export const createConversation = async (req, res, next) => {
   try {

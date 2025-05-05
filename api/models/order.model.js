@@ -1,44 +1,71 @@
-import mongoose from "mongoose";
-const { Schema } = mongoose;
-// Tiến bị ngu
-const OrderSchema = new Schema(
-  {
-    gigId: {
-      type: String,
-      required: true,
-    },
-    img: {
-      type: String,
-      required: false,
-    },
-    title: {
-      type: String,
-      required: true,
-    },
-    price: {
-      type: Number,
-      required: true,
-    },
-    sellerId: {
-      type: String,
-      required: true,
-    },
-    buyerId: {
-      type: String,
-      required: true,
-    },
-    isCompleted: {
-      type: Boolean,
-      default: false,
-    },
-    payment_intent: {
-      type: String,
-      required: true,
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
+import { DataTypes } from "sequelize";
 
-export default mongoose.model("Order", OrderSchema);
+const Order = (sequelize) =>
+  sequelize.define(
+    "Order",
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+      },
+      gig_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: "gigs",
+          key: "id",
+        },
+      },
+      buyer_clerk_id: {
+        type: DataTypes.STRING(255),
+        allowNull: false,
+        references: {
+          model: "user_account",
+          key: "clerk_id",
+        },
+      },
+      seller_clerk_id: {
+        type: DataTypes.STRING(255),
+        allowNull: false,
+        references: {
+          model: "user_account",
+          key: "clerk_id",
+        },
+      },
+      order_status: {
+        type: DataTypes.ENUM(
+          "pending",
+          "in_progress",
+          "delivered",
+          "completed",
+          "cancelled"
+        ),
+        allowNull: false,
+        defaultValue: "pending",
+      },
+      total_price: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+      },
+      order_date: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
+      },
+      delivery_deadline: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+    },
+    {
+      tableName: "orders",
+      timestamps: false,
+      indexes: [
+        { fields: ["buyer_clerk_id"] },
+        { fields: ["seller_clerk_id"] },
+      ],
+    }
+  );
+
+export default Order;

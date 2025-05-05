@@ -1,29 +1,60 @@
-import mongoose from "mongoose";
-const { Schema } = mongoose;
-// Tiến bị ngu
-const ReviewSchema = new Schema(
-  {
-    gigId: {
-      type: String,
-      required: true,
-    },
-    userId: {
-      type: String,
-      required: true,
-    },
-    star: {
-      type: Number,
-      required: true,
-      enum:[1,2,3,4,5]
-    },
-    desc: {
-      type: String,
-      required: true,
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
+import { DataTypes } from "sequelize";
 
-export default mongoose.model("Review", ReviewSchema);
+const Review = (sequelize) =>
+  sequelize.define(
+    "Review",
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+      },
+      order_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: "orders",
+          key: "id",
+        },
+      },
+      gig_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: "gigs",
+          key: "id",
+        },
+      },
+      reviewer_clerk_id: {
+        type: DataTypes.STRING(255),
+        allowNull: false,
+        references: {
+          model: "user_account",
+          key: "clerk_id",
+        },
+      },
+      rating: {
+        type: DataTypes.TINYINT,
+        allowNull: false,
+        validate: {
+          min: 1,
+          max: 5,
+        },
+      },
+      comment: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
+      created_at: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
+      },
+    },
+    {
+      tableName: "reviews",
+      timestamps: false,
+    }
+  );
+
+export default Review;

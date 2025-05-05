@@ -1,40 +1,44 @@
 import { DataTypes } from "sequelize";
 
-const Conversation = (sequelize) =>
+const ContactForm = (sequelize) =>
   sequelize.define(
-    "Conversation",
+    "ContactForm",
     {
       id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
       },
-      sender_clerk_id: {
+      clerk_id: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+        references: {
+            model: "user_account",
+            key: "clerk_id",
+          },
+      },
+      name: {
+        type: DataTypes.STRING(50),
+        allowNull: true,
+      },
+      email: {
         type: DataTypes.STRING(255),
         allowNull: false,
-        references: {
-          model: "user_account",
-          key: "clerk_id",
-        },
       },
-      receiver_clerk_id: {
-        type: DataTypes.STRING(255),
+      message: {
+        type: DataTypes.TEXT,
         allowNull: false,
-        references: {
-          model: "user_account",
-          key: "clerk_id",
-        },
       },
-      created_at: {
+      submitted_at: {
         type: DataTypes.DATE,
         allowNull: false,
         defaultValue: DataTypes.NOW,
       },
     },
     {
-      tableName: "conversation",
+      tableName: "contact_form",
       timestamps: false,
     }
   );
 
-export default Conversation;
+export default ContactForm;

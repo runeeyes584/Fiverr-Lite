@@ -1,72 +1,76 @@
-import mongoose from "mongoose";
-const { Schema } = mongoose;
-// Tiến bị ngu
-const GigSchema = new Schema(
-  {
-    userId: {
-      type: String,
-      required: true,
-    },
-    title: {
-      type: String,
-      required: true,
-    },
-    desc: {
-      type: String,
-      required: true,
-    },
-    totalStars: {
-      type: Number,
-      default: 0,
-    },
-    starNumber: {
-      type: Number,
-      default: 0,
-    },
-    cat: {
-      type: String,
-      required: true,
-    },
-    price: {
-      type: Number,
-      required: true,
-    },
-    cover: {
-      type: String,
-      required: true,
-    },
-    images: {
-      type: [String],
-      required: false,
-    },
-    shortTitle: {
-      type: String,
-      required: true,
-    },
-    shortDesc: {
-      type: String,
-      required: true,
-    },
-    deliveryTime: {
-      type: Number,
-      required: true,
-    },
-    revisionNumber: {
-      type: Number,
-      required: true,
-    },
-    features: {
-      type: [String],
-      required: false,
-    },
-    sales: {
-      type: Number,
-      default: 0,
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
+import { DataTypes } from "sequelize";
 
-export default mongoose.model("Gig", GigSchema);
+const Gig = (sequelize) =>
+  sequelize.define(
+    "Gig",
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+      },
+      seller_clerk_id: {
+        type: DataTypes.STRING(255),
+        allowNull: false,
+        references: {
+          model: "user_account",
+          key: "clerk_id",
+        },
+      },
+      category_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: "category",
+          key: "id",
+        },
+      },
+      job_type_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: "job_type",
+          key: "id",
+        },
+      },
+      title: {
+        type: DataTypes.STRING(255),
+        allowNull: false,
+      },
+      description: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+      },
+      starting_price: {
+        type: DataTypes.FLOAT,
+        allowNull: false,
+      },
+      delivery_time: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
+      gig_image: {
+        type: DataTypes.STRING(500),
+        allowNull: true,
+      },
+      city: {
+        type: DataTypes.STRING(100),
+        allowNull: true,
+      },
+      country: {
+        type: DataTypes.STRING(100),
+        allowNull: true,
+      },
+      status: {
+        type: DataTypes.STRING(50),
+        allowNull: false,
+        defaultValue: "active",
+      },
+    },
+    {
+      tableName: "gigs",
+      timestamps: false,
+    }
+  );
+
+export default Gig;
