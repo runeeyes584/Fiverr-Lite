@@ -1,13 +1,19 @@
-import express from "express";
-import { confirm, getOrders, intent } from "../controllers/order.controller.js";
-import { verifyToken } from "../middleware/jwt.js";
+import express from 'express';
+import {
+  createPaymentIntent,
+  confirmOrder,
+  getOrders  
+} from '../controllers/order.controller.js';
+import requireAuth from '../middleware/requireAuth.js';
 
 const router = express.Router();
 
-// router.post("/:gigId", verifyToken, createOrder);
-router.get("/", verifyToken, getOrders);
-router.post("/create-payment-intent/:id", verifyToken, intent);
-router.put("/", verifyToken, confirm);
+// Lấy danh sách order
+router.get('/', requireAuth, getOrders);
+// Tạo payment intent
+router.post('/payment-intent', requireAuth, createPaymentIntent);
+// Xác nhận order
+router.post('/confirm', requireAuth, confirmOrder);
+
 
 export default router;
-// Tiến bị ngu

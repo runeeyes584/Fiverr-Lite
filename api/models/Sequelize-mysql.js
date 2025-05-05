@@ -13,7 +13,7 @@ const sequelize = new Sequelize({
   dialect: "mysql",
   host: process.env.DB_HOST || "localhost",
   username: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "10022004",
+  password: process.env.DB_PASSWORD || "151004abyss",
   database: process.env.DB_NAME || "fiverr_new",
   port: 3306,
 });
@@ -127,8 +127,6 @@ const defineRelations = (models) => {
   models.Gig.hasMany(models.GigTranslation, { foreignKey: "gig_id" });
   models.GigTranslation.belongsTo(models.Gig, { foreignKey: "gig_id" });
 
-  models.Conversation.belongsTo(models.User, { foreignKey: "sender_clerk_id", targetKey: "clerk_id", as: "sender" });
-  models.Conversation.belongsTo(models.User, { foreignKey: "receiver_clerk_id", targetKey: "clerk_id", as: "receiver" });
 };
 
 defineRelations(initializedModels);

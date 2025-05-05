@@ -2,17 +2,17 @@ import express from "express";
 import {
   createGig,
   deleteGig,
-  getGig,
-  getGigs
+  getAllGigs,
+  getGigById
 } from "../controllers/gig.controller.js";
-import { verifyToken } from "../middleware/jwt.js";
+import requireAuth from '../middleware/requireAuth.js';
 
 const router = express.Router();
 
-router.post("/", verifyToken, createGig);
-router.delete("/:id", verifyToken, deleteGig);
-router.get("/single/:id", getGig);
-router.get("/", getGigs);
+router.post("/", requireAuth, createGig);
+router.delete("/:id", requireAuth, deleteGig);
+router.get("/", getAllGigs);
+router.get("/:id", getGigById);
 
 export default router;
-// Tiến bị ngu
+

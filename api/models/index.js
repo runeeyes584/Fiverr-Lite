@@ -22,14 +22,13 @@ import UserSearchHistory from "./userSearchHistory.model.js";
 import Notification from "./notification.model.js";
 import CVFile from "./cvFiles.model.js";
 import GigTranslation from "./gigTranslation.model.js";
-import Conversation from "./conversation.model.js";
+
 
 export default {
   JobType,
   Category,
   Skills,
   User,
-  Conversation,
   Company,
   CompanyImage,
   SeekerProfile,

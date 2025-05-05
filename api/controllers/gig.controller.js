@@ -1,125 +1,116 @@
-// import Gig from "../models/gig.model.js";
-// import createError from "../utils/createError.js";
-// // Tiến bị ngu
-// export const createGig = async (req, res, next) => {
-//   if (!req.isSeller)
-//     return next(createError(403, "Only sellers can create a gig!"));
+import { models } from '../models/Sequelize-mysql.js';
+import { Op } from 'sequelize';
 
-//   const newGig = new Gig({
-//     userId: req.userId,
-//     ...req.body,
-//   });
-
-//   try {
-//     const savedGig = await newGig.save();
-//     res.status(201).json(savedGig);
-//   } catch (err) {
-//     next(err);
-//   }
-// };
-// export const deleteGig = async (req, res, next) => {
-//   try {
-//     const gig = await Gig.findById(req.params.id);
-//     if (gig.userId !== req.userId)
-//       return next(createError(403, "You can delete only your gig!"));
-
-//     await Gig.findByIdAndDelete(req.params.id);
-//     res.status(200).send("Gig has been deleted!");
-//   } catch (err) {
-//     next(err);
-//   }
-// };
-// export const getGig = async (req, res, next) => {
-//   try {
-//     const gig = await Gig.findById(req.params.id);
-//     if (!gig) next(createError(404, "Gig not found!"));
-//     res.status(200).send(gig);
-//   } catch (err) {
-//     next(err);
-//   }
-// };
-// export const getGigs = async (req, res, next) => {
-//   const q = req.query;
-//   const filters = {
-//     ...(q.userId && { userId: q.userId }),
-//     ...(q.cat && { cat: q.cat }),
-//     ...((q.min || q.max) && {
-//       price: {
-//         ...(q.min && { $gt: q.min }),
-//         ...(q.max && { $lt: q.max }),
-//       },
-//     }),
-//     ...(q.search && { title: { $regex: q.search, $options: "i" } }),
-//   };
-//   try {
-//     const gigs = await Gig.find(filters).sort({ [q.sort]: -1 });
-//     res.status(200).send(gigs);
-//   } catch (err) {
-//     next(err);
-//   }
-// };
-
-
-import { models } from "../models/Sequelize-mysql.js";
-import createError from "../utils/createError.js";
-import { Op } from "sequelize";
-
+// Tạo gig
 export const createGig = async (req, res, next) => {
-  if (!req.isSeller)
-    return next(createError(403, "Only sellers can create a gig!"));
-
   try {
-    const newGig = await models.Gig.create({
-      userId: req.userId,
-      ...req.body,
+    const { seller_clerk_id, category_id, job_type_id, title, description, starting_price, delivery_time, gig_image, city, country } = req.body;
+    if (!seller_clerk_id || !title) {
+      return res.status(400).json({ success: false, message: 'Missing required fields: seller_clerk_id or title' });
+    }
+    const gig = await models.Gig.create({
+      seller_clerk_id,
+      category_id,
+      job_type_id,
+      title,
+      description,
+      starting_price,
+      delivery_time,
+      gig_image,
+      city,
+      country,
     });
-    res.status(201).json(newGig);
-  } catch (err) {
-    next(err);
+    console.log(`Gig created: id=${gig.id}`);
+    return res.status(201).json({ success: true, message: 'Gig created successfully', gig });
+  } catch (error) {
+    console.error('Error creating gig:', error.message);
+    return res.status(500).json({ success: false, message: 'Error creating gig', error: error.message });
   }
 };
 
+// Lấy tất cả gig (phân trang và lọc)
+export const getAllGigs = async (req, res, next) => {
+  try {
+    const { page = 1, limit = 10, category_id, status } = req.query;
+    const offset = (page - 1) * limit;
+    const where = {};
+    if (category_id) where.category_id = category_id;
+    if (status) where.status = status;
+
+    const gigs = await models.Gig.findAndCountAll({
+      where,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+    });
+    return res.status(200).json({
+      success: true,
+      total: gigs.count,
+      pages: Math.ceil(gigs.count / limit),
+      gigs: gigs.rows,
+    });
+  } catch (error) {
+    console.error('Error fetching gigs:', error.message);
+    return res.status(500).json({ success: false, message: 'Error fetching gigs', error: error.message });
+  }
+};
+
+// Lấy gig theo ID
+export const getGigById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const gig = await models.Gig.findByPk(id);
+    if (!gig) {
+      return res.status(404).json({ success: false, message: 'Gig not found' });
+    }
+    return res.status(200).json({ success: true, gig });
+  } catch (error) {
+    console.error('Error fetching gig:', error.message);
+    return res.status(500).json({ success: false, message: 'Error fetching gig', error: error.message });
+  }
+};
+
+// Cập nhật gig
+export const updateGig = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { category_id, job_type_id, title, description, starting_price, delivery_time, gig_image, city, country, status } = req.body;
+    const gig = await models.Gig.findByPk(id);
+    if (!gig) {
+      return res.status(404).json({ success: false, message: 'Gig not found' });
+    }
+    await gig.update({
+      category_id,
+      job_type_id,
+      title,
+      description,
+      starting_price,
+      delivery_time,
+      gig_image,
+      city,
+      country,
+      status,
+    });
+    console.log(`Gig updated: id=${id}`);
+    return res.status(200).json({ success: true, message: 'Gig updated successfully', gig });
+  } catch (error) {
+    console.error('Error updating gig:', error.message);
+    return res.status(500).json({ success: false, message: 'Error updating gig', error: error.message });
+  }
+};
+
+// Xóa gig
 export const deleteGig = async (req, res, next) => {
   try {
-    const gig = await models.Gig.findByPk(req.params.id);
-    if (!gig) return next(createError(404, "Gig not found!"));
-    if (gig.userId !== req.userId)
-      return next(createError(403, "You can delete only your gig!"));
-
+    const { id } = req.params;
+    const gig = await models.Gig.findByPk(id);
+    if (!gig) {
+      return res.status(404).json({ success: false, message: 'Gig not found' });
+    }
     await gig.destroy();
-    res.status(200).send("Gig has been deleted!");
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const getGig = async (req, res, next) => {
-  try {
-    const gig = await models.Gig.findByPk(req.params.id);
-    if (!gig) return next(createError(404, "Gig not found!"));
-    res.status(200).send(gig);
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const getGigs = async (req, res, next) => {
-  const q = req.query;
-  const filters = {
-    ...(q.userId && { userId: q.userId }),
-    ...(q.cat && { cat: q.cat }),
-    ...(q.min && { price: { [Op.gt]: q.min } }),
-    ...(q.max && { price: { [Op.lt]: q.max } }),
-    ...(q.search && { title: { [Op.like]: `%${q.search}%` } }),
-  };
-
-  try {
-    const gigs = await models.Gig.findAll({
-      where: filters,
-      order: [[q.sort || "createdAt", "DESC"]],
-    });
-    res.status(200).send(gigs);
-  } catch (err) {
-    next(err);
+    console.log(`Gig deleted: id=${id}`);
+    return res.status(200).json({ success: true, message: 'Gig deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting gig:', error.message);
+    return res.status(500).json({ success: false, message: 'Error deleting gig', error: error.message });
   }
 };
