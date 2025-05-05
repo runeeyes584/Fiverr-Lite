@@ -5,7 +5,9 @@ import "./Login.scss"
 function Login() {
   return (
     <div className="mid">
-      <SignIn />
+      <SignIn 
+        signInForceRedirectUrl="/selectRole"
+      />
     </div>
   )
 }
