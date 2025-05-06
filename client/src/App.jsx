@@ -48,16 +48,12 @@ function App() {
         },
         {
           path: "/gigs",
-          element: (
-            <ProtectedRoute requiredRole="seller">
-              <Gigs />
-            </ProtectedRoute>
-          ),
+          element: <Gigs />,
         },
         {
           path: "/myGigs",
           element: (
-            <ProtectedRoute requiredRole="seller">
+            <ProtectedRoute requiredRole={["seller", "admin"]}>
               <MyGigs />
             </ProtectedRoute>
           ),
@@ -76,7 +72,11 @@ function App() {
         },
         {
           path: "/add",
-          element: <Add />,
+          element: (
+            <ProtectedRoute requiredRole={["seller", "admin"]}>
+              <Add />
+            </ProtectedRoute>
+          ),
         },
         {
           path: "/gig/:id",
