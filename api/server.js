@@ -51,9 +51,11 @@ sequelize
     console.error("Lỗi kết nối MySQL:", err.message);
   });
   
+  
+app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+
 app.use("/api/users", userRoute);
 
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(express.json());
 
 // Routes
