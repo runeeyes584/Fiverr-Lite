@@ -13,7 +13,7 @@ const sequelize = new Sequelize({
   dialect: "mysql",
   host: process.env.DB_HOST || "localhost",
   username: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "151004abyss",
+  password: process.env.DB_PASSWORD || "10022004",
   database: process.env.DB_NAME || "fiverr_new",
   port: 3306,
 });

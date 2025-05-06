@@ -11,7 +11,7 @@ const SelectRole = () => {
 
   useEffect(() => {
     if (isLoaded && user) {
-      if (user.publicMetadata && typeof user.publicMetadata.isSeller !== 'undefined') {
+      if (user.publicMetadata && (typeof user.publicMetadata.isSeller !== 'undefined' || typeof user.publicMetadata.isAdmin !== 'undefined')) {
         console.log("Vai trò đã được chọn, chuyển hướng về trang chủ...");
         navigate("/");
       }
