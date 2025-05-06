@@ -168,7 +168,7 @@ function Navbar() {
         </div>
         <div className="logo">
           <Link className="link" to="/" onClick={handleLinkClick}>
-            <span className="text">liverr</span>
+            <span className="text">Liverr</span>
             <span className="dot">.</span>
           </Link>
         </div>
@@ -288,14 +288,14 @@ function Navbar() {
             )}
             {currentUser && (
               <>
+                {currentUser.isAdmin && (
+                  <Link to="/admin" onClick={handleLinkClick}>Admin Dashboard</Link>
+                )}
                 {(currentUser.isSeller || currentUser.isAdmin) && (
                   <>
                     <Link to="/mygigs" onClick={handleLinkClick}>Gigs</Link>
                     <Link to="/add" onClick={handleLinkClick}>Add New Gig</Link>
                   </>
-                )}
-                {currentUser.isAdmin && (
-                  <Link to="/admin" onClick={handleLinkClick}>Admin Dashboard</Link>
                 )}
                 <Link to="/orders" onClick={handleLinkClick}>Orders</Link>
                 <Link to="/messages" onClick={handleLinkClick}>Messages</Link>
