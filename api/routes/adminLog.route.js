@@ -7,7 +7,7 @@ const router = express.Router();
 // Lấy danh sách admin logs
 router.get('/', getAdminLogs);
 // Ghi lại hành động của admin
-router.post('/', requireAuth, logAdminAction);
+router.post('/', logAdminAction);
 // Lấy danh sách admin logs theo id
 
 

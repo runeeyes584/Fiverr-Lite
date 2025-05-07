@@ -5,7 +5,7 @@ async function initDb() {
     await sequelize.authenticate();
     console.log("Kết nối MySQL thành công");
 
-    await sequelize.sync({ force: true });
+    await sequelize.sync({ force: true }); //force true để xóa và tạo lại tất cả các bảng, có thể thay đổi thành false nếu không muốn xóa dữ liệu cũ
     console.log("Tạo database thành công");
 
     // Tạo job_type
