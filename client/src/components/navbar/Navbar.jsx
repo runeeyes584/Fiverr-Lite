@@ -168,7 +168,7 @@ function Navbar() {
         </div>
         <div className="logo">
           <Link className="link" to="/" onClick={handleLinkClick}>
-            <span className="text">liverr</span>
+            <span className="text">Liverr</span>
             <span className="dot">.</span>
           </Link>
         </div>
@@ -188,7 +188,14 @@ function Navbar() {
                   <Link className="link" to="/profile" onClick={handleLinkClick}>
                     <span>Profile</span>
                   </Link>
-                  {currentUser.isSeller && (
+                  {currentUser.isAdmin && (
+                    <>
+                      <Link className="link" to="/admin" onClick={handleLinkClick}>
+                        Admin Dashboard
+                      </Link>
+                    </>
+                  )}
+                  {(currentUser.isSeller || currentUser.isAdmin) && (
                     <>
                       <Link className="link" to="/mygigs" onClick={handleLinkClick}>
                         Gigs
@@ -197,14 +204,7 @@ function Navbar() {
                         Add New Gig
                       </Link>
                     </>
-                  )}
-                  {currentUser.isAdmin && (
-                    <>
-                      <Link className="link" to="/admin" onClick={handleLinkClick}>
-                        Admin Dashboard
-                      </Link>
-                    </>
-                  )}
+                  )}                 
                   <Link className="link" to="/orders" onClick={handleLinkClick}>
                     Orders
                   </Link>
@@ -288,14 +288,14 @@ function Navbar() {
             )}
             {currentUser && (
               <>
-                {currentUser.isSeller && (
+                {currentUser.isAdmin && (
+                  <Link to="/admin" onClick={handleLinkClick}>Admin Dashboard</Link>
+                )}
+                {(currentUser.isSeller || currentUser.isAdmin) && (
                   <>
                     <Link to="/mygigs" onClick={handleLinkClick}>Gigs</Link>
                     <Link to="/add" onClick={handleLinkClick}>Add New Gig</Link>
                   </>
-                )}
-                {currentUser.isAdmin && (
-                  <Link to="/admin" onClick={handleLinkClick}>Admin Dashboard</Link>
                 )}
                 <Link to="/orders" onClick={handleLinkClick}>Orders</Link>
                 <Link to="/messages" onClick={handleLinkClick}>Messages</Link>
