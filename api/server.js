@@ -71,7 +71,7 @@ app.use("/api/gigSkills", gigSkillsRoute);
 app.use("/api/gigTranslations", gigTranslationRoute);
 app.use("/api/gigViewCounts", gigViewCountsRoute);
 app.use("/api/gigViews", gigViewsRoute);
-app.use("/api/jobTypes", jobTypeRoute);
+app.use("/api/job-types", jobTypeRoute);
 app.use("/api/messages", messageRoute);
 app.use("/api/notifications", notificationRoute);
 app.use("/api/orders", orderRoute);

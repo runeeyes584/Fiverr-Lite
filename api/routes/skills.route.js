@@ -1,24 +1,14 @@
 import express from 'express';
-import {
-  createSkill,
-  deleteSkill,
-  getAllSkills,
-  getSkillById,
-  updateSkill
-} from '../controllers/skills.controller.js';
+import { createSkill, deleteSkill, getAllSkills, getSkillById, updateSkill } from '../controllers/skills.controller.js';
+import { authenticateAndLoadUser, isAdmin } from '../middleware/getAuth.js';
 import requireAuth from '../middleware/requireAuth.js';
 
 const router = express.Router();
 
-// Lấy danh sách skill
 router.get('/', getAllSkills);
-// Lấy skill theo id
 router.get('/:id', getSkillById);
-// Tạo skill mới
-router.post('/', requireAuth, createSkill);
-// Cập nhật skill
-router.patch('/:id', requireAuth, updateSkill);
-// Xóa skill
-router.delete('/:id', requireAuth, deleteSkill);
+router.post('/', requireAuth, authenticateAndLoadUser, isAdmin, createSkill);
+router.put('/:id', requireAuth, authenticateAndLoadUser, isAdmin, updateSkill);
+router.delete('/:id', requireAuth, authenticateAndLoadUser, isAdmin, deleteSkill);
 
 export default router;

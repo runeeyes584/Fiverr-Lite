@@ -1,78 +1,122 @@
 import { models } from '../models/Sequelize-mysql.js';
 
-// Tạo danh mục
 export const createCategory = async (req, res, next) => {
   try {
     const { name } = req.body;
-    if (!name) {
-      return res.status(400).json({ success: false, message: 'Missing required field: name' });
+    if (!name || typeof name !== 'string' || name.trim() === '') {
+      const error = new Error("Category name is required and must be a non-empty string.");
+      error.status = 400;
+      return next(error);
     }
-    const category = await models.Category.create({ name });
-    console.log(`Category created: id=${category.id}`);
-    return res.status(201).json({ success: true, message: 'Category created successfully', category });
+    const trimmedName = name.trim();
+    const newCategory = await models.Category.create({ name: trimmedName });
+    console.log(`Category created: id=${newCategory.id}`);
+    res.status(201).json({ success: true, message: 'Category created successfully', category: newCategory });
   } catch (error) {
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      const err = new Error(`Category name '${req.body.name}' already exists.`);
+      err.status = 409;
+      return next(err);
+    }
     console.error('Error creating category:', error.message);
-    return res.status(500).json({ success: false, message: 'Error creating category', error: error.message });
+    next(error);
   }
 };
 
-// Lấy tất cả danh mục
 export const getAllCategories = async (req, res, next) => {
   try {
-    const categories = await models.Category.findAll();
-    return res.status(200).json({ success: true, categories });
+    const categories = await models.Category.findAll({
+      attributes: ['id', 'name']
+    });
+    res.status(200).json({ success: true, categories });
   } catch (error) {
     console.error('Error fetching categories:', error.message);
-    return res.status(500).json({ success: false, message: 'Error fetching categories', error: error.message });
+    next(error);
   }
 };
 
-// Lấy danh mục theo ID
 export const getCategoryById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const category = await models.Category.findByPk(id);
+    const category = await models.Category.findByPk(id, {
+      attributes: ['id', 'name']
+    });
     if (!category) {
-      return res.status(404).json({ success: false, message: 'Category not found' });
+      const error = new Error('Category not found');
+      error.status = 404;
+      return next(error);
     }
-    return res.status(200).json({ success: true, category });
+    res.status(200).json({ success: true, category });
   } catch (error) {
-    console.error('Error fetching category:', error.message);
-    return res.status(500).json({ success: false, message: 'Error fetching category', error: error.message });
+    console.error('Error fetching category by ID:', error.message);
+    next(error);
   }
 };
 
-// Cập nhật danh mục
 export const updateCategory = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { name } = req.body;
+    if (!name || typeof name !== 'string' || name.trim() === '') {
+      const error = new Error("Category name is required and must be a non-empty string.");
+      error.status = 400;
+      return next(error);
+    }
+    const trimmedName = name.trim();
     const category = await models.Category.findByPk(id);
     if (!category) {
-      return res.status(404).json({ success: false, message: 'Category not found' });
+      const error = new Error('Category not found');
+      error.status = 404;
+      return next(error);
     }
-    await category.update({ name });
+    category.name = trimmedName;
+    await category.save();
     console.log(`Category updated: id=${id}`);
-    return res.status(200).json({ success: true, message: 'Category updated successfully', category });
+    res.status(200).json({ success: true, message: 'Category updated successfully', category });
   } catch (error) {
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      const err = new Error(`Category name '${req.body.name}' already exists.`);
+      err.status = 409;
+      return next(err);
+    }
     console.error('Error updating category:', error.message);
-    return res.status(500).json({ success: false, message: 'Error updating category', error: error.message });
+    next(error);
   }
 };
 
-// Xóa danh mục
 export const deleteCategory = async (req, res, next) => {
+  const categoryId = req.params.id;
   try {
-    const { id } = req.params;
-    const category = await models.Category.findByPk(id);
+    const category = await models.Category.findByPk(categoryId);
     if (!category) {
-      return res.status(404).json({ success: false, message: 'Category not found' });
+      const error = new Error('Category not found');
+      error.status = 404;
+      return next(error);
     }
+
+    //KIỂM TRA RÀNG BUỘC
+    const gigCount = await models.Gig.count({ where: { category_id: categoryId } });
+    const searchHistoryCount = await models.UserSearchHistory.count({ where: { category_id: categoryId } });
+
+    if (gigCount > 0 || searchHistoryCount > 0) {
+      console.warn(`Deletion prevented for category ID ${categoryId}: Used in ${gigCount} gigs and ${searchHistoryCount} search histories.`);
+      const error = new Error(`Cannot delete category because it is currently used by ${gigCount} gig(s) and ${searchHistoryCount} search history record(s).`);
+      error.status = 409;
+      return next(error);
+    }
+
     await category.destroy();
-    console.log(`Category deleted: id=${id}`);
-    return res.status(200).json({ success: true, message: 'Category deleted successfully' });
+    console.log(`Category deleted: id=${categoryId}`);
+    res.status(204).send();
   } catch (error) {
+     // Lỗi ràng buộc khóa ngoại từ DB (nếu không kiểm tra ở trên hoặc DB cấu hình khác)
+     if (error.name === 'SequelizeForeignKeyConstraintError') {
+        console.warn(`Deletion failed for category ID ${categoryId} due to DB foreign key constraint.`);
+        const err = new Error("Cannot delete category due to database constraints (referenced by other records).");
+        err.status = 409;
+       return next(err);
+     }
     console.error('Error deleting category:', error.message);
-    return res.status(500).json({ success: false, message: 'Error deleting category', error: error.message });
+    next(error);
   }
 };

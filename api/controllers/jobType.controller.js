@@ -1,78 +1,121 @@
 import { models } from '../models/Sequelize-mysql.js';
 
-// Tạo loại công việc
 export const createJobType = async (req, res, next) => {
   try {
     const { job_type } = req.body;
-    if (!job_type) {
-      return res.status(400).json({ success: false, message: 'Missing required field: job_type' });
+    if (!job_type || typeof job_type !== 'string' || job_type.trim() === '') {
+      const error = new Error("Job type name (job_type) is required and must be a non-empty string.");
+      error.status = 400;
+      return next(error);
     }
-    const type = await models.JobType.create({ job_type });
-    console.log(`Job type created: id=${type.id}`);
-    return res.status(201).json({ success: true, message: 'Job type created successfully', type });
+    const trimmedName = job_type.trim();
+    const newJobType = await models.JobType.create({ job_type: trimmedName });
+    console.log(`JobType created: id=${newJobType.id}`);
+    res.status(201).json({ success: true, message: 'Job type created successfully', jobType: newJobType });
   } catch (error) {
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      const err = new Error(`Job type name '${req.body.job_type}' already exists.`);
+      err.status = 409;
+      return next(err);
+    }
     console.error('Error creating job type:', error.message);
-    return res.status(500).json({ success: false, message: 'Error creating job type', error: error.message });
+    next(error);
   }
 };
 
-// Lấy tất cả loại công việc
 export const getAllJobTypes = async (req, res, next) => {
   try {
-    const types = await models.JobType.findAll();
-    return res.status(200).json({ success: true, types });
+    const jobTypes = await models.JobType.findAll({
+      attributes: ['id', 'job_type']
+    });
+    res.status(200).json({ success: true, jobTypes });
   } catch (error) {
     console.error('Error fetching job types:', error.message);
-    return res.status(500).json({ success: false, message: 'Error fetching job types', error: error.message });
+    next(error);
   }
 };
 
-// Lấy loại công việc theo ID
 export const getJobTypeById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const type = await models.JobType.findByPk(id);
-    if (!type) {
-      return res.status(404).json({ success: false, message: 'Job type not found' });
+    const jobType = await models.JobType.findByPk(id, {
+      attributes: ['id', 'job_type']
+    });
+    if (!jobType) {
+      const error = new Error('Job type not found');
+      error.status = 404;
+      return next(error);
     }
-    return res.status(200).json({ success: true, type });
+    res.status(200).json({ success: true, jobType });
   } catch (error) {
-    console.error('Error fetching job type:', error.message);
-    return res.status(500).json({ success: false, message: 'Error fetching job type', error: error.message });
+    console.error('Error fetching job type by ID:', error.message);
+    next(error);
   }
 };
 
-// Cập nhật loại công việc
 export const updateJobType = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { job_type } = req.body;
-    const type = await models.JobType.findByPk(id);
-    if (!type) {
-      return res.status(404).json({ success: false, message: 'Job type not found' });
+    if (!job_type || typeof job_type !== 'string' || job_type.trim() === '') {
+      const error = new Error("Job type name (job_type) is required and must be a non-empty string.");
+      error.status = 400;
+      return next(error);
     }
-    await type.update({ job_type });
-    console.log(`Job type updated: id=${id}`);
-    return res.status(200).json({ success: true, message: 'Job type updated successfully', type });
+    const trimmedName = job_type.trim();
+    const jobTypeInstance = await models.JobType.findByPk(id);
+    if (!jobTypeInstance) {
+      const error = new Error('Job type not found');
+      error.status = 404;
+      return next(error);
+    }
+    jobTypeInstance.job_type = trimmedName;
+    await jobTypeInstance.save();
+    console.log(`JobType updated: id=${id}`);
+    res.status(200).json({ success: true, message: 'Job type updated successfully', jobType: jobTypeInstance });
   } catch (error) {
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      const err = new Error(`Job type name '${req.body.job_type}' already exists.`);
+      err.status = 409;
+      return next(err);
+    }
     console.error('Error updating job type:', error.message);
-    return res.status(500).json({ success: false, message: 'Error updating job type', error: error.message });
+    next(error);
   }
 };
 
-// Xóa loại công việc
 export const deleteJobType = async (req, res, next) => {
+  const jobTypeId = req.params.id;
   try {
-    const { id } = req.params;
-    const type = await models.JobType.findByPk(id);
-    if (!type) {
-      return res.status(404).json({ success: false, message: 'Job type not found' });
+    const jobTypeInstance = await models.JobType.findByPk(jobTypeId);
+    if (!jobTypeInstance) {
+      const error = new Error('Job type not found');
+      error.status = 404;
+      return next(error);
     }
-    await type.destroy();
-    console.log(`Job type deleted: id=${id}`);
-    return res.status(200).json({ success: true, message: 'Job type deleted successfully' });
+
+    //KIỂM TRA RÀNG BUỘC
+    const gigCount = await models.Gig.count({ where: { job_type_id: jobTypeId } });
+    const searchHistoryCount = await models.UserSearchHistory.count({ where: { job_type_id: jobTypeId } });
+
+    if (gigCount > 0 || searchHistoryCount > 0) {
+      console.warn(`Deletion prevented for job type ID ${jobTypeId}: Used in ${gigCount} gigs and ${searchHistoryCount} search histories.`);
+      const error = new Error(`Cannot delete job type because it is currently used by ${gigCount} gig(s) and ${searchHistoryCount} search history record(s).`);
+      error.status = 409; 
+      return next(error);
+    }
+
+    await jobTypeInstance.destroy();
+    console.log(`JobType deleted: id=${jobTypeId}`);
+    res.status(204).send();
   } catch (error) {
+     if (error.name === 'SequelizeForeignKeyConstraintError') {
+        console.warn(`Deletion failed for job type ID ${jobTypeId} due to DB foreign key constraint.`);
+        const err = new Error("Cannot delete job type due to database constraints (referenced by other records).");
+        err.status = 409;
+       return next(err);
+     }
     console.error('Error deleting job type:', error.message);
-    return res.status(500).json({ success: false, message: 'Error deleting job type', error: error.message });
+    next(error);
   }
 };
