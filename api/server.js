@@ -50,13 +50,21 @@ sequelize
   .catch((err) => {
     console.error("Lỗi kết nối MySQL:", err.message);
   });
+<<<<<<< HEAD
+
+
+  
+=======
   
   
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 
 app.use("/api/users", userRoute);
 
+>>>>>>> 0443c4f46808736e7671d3d74d86d06de7d3132e
 app.use(express.json());
+app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+
 
 // Routes
 app.use("/api/adminLog", adminLogRoute);

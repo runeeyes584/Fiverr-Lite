@@ -18,9 +18,9 @@ router.get("/", async (req, res, next) => {
   });
 
   // Cập nhật user (cho kiểm tra)
-// router.post('/create', createUser);
-// router.patch('/:clerkId', updateUser);
-// router.delete('/:clerkId', deleteUser);
+router.post('/create', createUser);
+router.patch('/:clerkId', updateUser);
+router.delete('/:clerkId', deleteUser);
 
 
 export default router;

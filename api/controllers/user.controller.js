@@ -2,6 +2,7 @@ import { Webhook } from "svix";
 import { models } from "../models/Sequelize-mysql.js"; // Đảm bảo đường dẫn đúng
 import { Clerk } from '@clerk/clerk-sdk-node';
 
+
 export const handleClerkWebhook = async (req, res) => {
   const svix_id = req.headers["svix-id"];
   const svix_timestamp = req.headers["svix-timestamp"];
@@ -36,7 +37,7 @@ export const handleClerkWebhook = async (req, res) => {
   try {
     const { id } = evt.data;
     const eventType = evt.type;
-    console.log(`Webhook Controller: Received: Type=${eventType}, ID=${id}`);
+    console.log(`Webhook Controller: Received: Type=${eventType}, ID=${id}, Data:`, JSON.stringify(evt.data, null, 2));
 
     if (eventType === "user.created" || eventType === "user.updated") {
       const {
@@ -71,7 +72,7 @@ export const handleClerkWebhook = async (req, res) => {
 
       await models.User.upsert(userData);
 
-      console.log(`Webhook Controller (${eventType}): User ${id} processed`);
+      console.log(`Webhook Controller (${eventType}): User ${id} processed, Upsert result:`, userData);
       return res.status(200).json({
         success: true,
         message: "Webhook processed and DB updated successfully",
@@ -123,19 +124,14 @@ export const handleClerkWebhook = async (req, res) => {
 // Tạo user mới qua Clerk API
 export const createUser = async (req, res, next) => {
   try {
-    // Kiểm tra req.body
-    if (!req.body) {
-      return res.status(400).json({ success: false, message: 'Request body is missing' });
-    }
-
-    const { email, username, password, publicMetadata } = req.body;
+    const { email, username, password, publicMetadata } = req.body || {};
 
     // Kiểm tra các trường bắt buộc
     if (!email || !username || !password) {
       return res.status(400).json({ success: false, message: 'Missing required fields: email, username, or password' });
     }
 
-    const clerkClient = new Clerk({ apiKey: process.env.CLERK_SECRET_KEY });
+    const clerkClient = new Clerk({ secretKey: process.env.CLERK_SECRET_KEY });
     const newUser = await clerkClient.users.createUser({
       emailAddress: [email],
       username,
@@ -146,8 +142,17 @@ export const createUser = async (req, res, next) => {
     console.log(`User created via API: clerk_id=${newUser.id}`);
     return res.status(201).json({ success: true, user: newUser });
   } catch (err) {
-    console.error('Error creating user:', err.message);
-    return next(err);
+    console.error('Error creating user:', {
+      message: err.message,
+      status: err.status,
+      errors: err.errors || err.response?.data || 'No additional error details'
+    });
+    return res.status(err.status || 500).json({
+      success: false,
+      message: 'Error creating user',
+      error: err.message,
+      details: err.errors || err.response?.data || 'No additional error details'
+    });
   }
 };
 
@@ -162,7 +167,7 @@ export const updateUser = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'No fields provided to update' });
     }
 
-    const clerkClient = new Clerk({ apiKey: process.env.CLERK_SECRET_KEY });
+    const clerkClient = new Clerk({ secretKey: process.env.CLERK_SECRET_KEY });
     const updatedUser = await clerkClient.users.updateUser(clerkId, {
       ...(email && { emailAddress: [email] }),
       ...(username && { username }),
@@ -182,7 +187,7 @@ export const deleteUser = async (req, res, next) => {
   try {
     const { clerkId } = req.params;
 
-    const clerkClient = new Clerk({ apiKey: process.env.CLERK_SECRET_KEY });
+    const clerkClient = new Clerk({ secretKey: process.env.CLERK_SECRET_KEY }); 
     await clerkClient.users.deleteUser(clerkId);
 
     console.log(`User deleted via API: clerk_id=${clerkId}`);
