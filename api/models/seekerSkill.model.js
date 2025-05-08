@@ -12,6 +12,10 @@ const SeekerSkill = (sequelize) =>
       clerk_id: {
         type: DataTypes.STRING(255),
         allowNull: false,
+        references: {
+          model: "user_account",
+          key: "clerk_id",
+        },
       },
       skill_id: {
         type: DataTypes.INTEGER,

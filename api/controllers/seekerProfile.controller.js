@@ -25,20 +25,13 @@ export const createSeekerProfile = async (req, res, next) => {
   }
 };
 
-// Lấy tất cả hồ sơ seeker (phân trang)
+// Lấy tất cả hồ sơ seeker (KHÔNG phân trang)
 export const getAllSeekerProfiles = async (req, res, next) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
-    const offset = (page - 1) * limit;
-    const profiles = await models.SeekerProfile.findAndCountAll({
-      limit: parseInt(limit),
-      offset: parseInt(offset),
-    });
+    const profiles = await models.SeekerProfile.findAll();
     return res.status(200).json({
       success: true,
-      total: profiles.count,
-      pages: Math.ceil(profiles.count / limit),
-      profiles: profiles.rows,
+      profiles,
     });
   } catch (error) {
     console.error('Error fetching seeker profiles:', error.message);

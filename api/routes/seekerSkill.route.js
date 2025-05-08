@@ -3,22 +3,21 @@ import {
   createSeekerSkill,
   deleteSeekerSkill,
   getAllSeekerSkills,
+  getSeekersBySkillId,
   getSeekerSkillById,
+  getSkillsByClerkId,
   updateSeekerSkill
 } from '../controllers/seekerSkill.controller.js';
 import requireAuth from '../middleware/requireAuth.js';
 
 const router = express.Router();
 
-// Lấy danh sách seeker skill
-router.get('/', requireAuth, getAllSeekerSkills);
-// Lấy seeker skill theo id
-router.get('/:id', requireAuth, getSeekerSkillById);
-// Tạo seeker skill mới
 router.post('/', requireAuth, createSeekerSkill);
-// Xóa seeker skill
+router.get('/', requireAuth, getAllSeekerSkills);
+router.get('/:id', requireAuth, getSeekerSkillById);
+router.put('/:id', requireAuth, updateSeekerSkill);
 router.delete('/:id', requireAuth, deleteSeekerSkill);
-// Cập nhật seeker skill
-router.patch('/:id', requireAuth, updateSeekerSkill);
+router.get('/clerk/:clerk_id', requireAuth, getSkillsByClerkId);
+router.get('/skill/:skill_id', requireAuth, getSeekersBySkillId);
 
 export default router;

@@ -94,7 +94,7 @@ app.use((err, req, res, next) => {
 
 // Đồng bộ database và khởi động server
 sequelize
-  .sync({ force: false })
+  .sync({ force: true })
   .then(() => {
     console.log("Database synced successfully");
     app.listen(8800, () => {
