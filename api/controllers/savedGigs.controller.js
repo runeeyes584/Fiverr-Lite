@@ -1,74 +1,133 @@
 import { models } from '../models/Sequelize-mysql.js';
 
-// Lưu gig
-export const createSavedGig = async (req, res, next) => {
+export const saveGig = async (req, res, next) => {
+  const currentUserClerkId = req.auth?.userId;
+  const gigId = req.params.gigId;
+
+  if (!currentUserClerkId) {
+    const error = new Error("Unauthorized: User ID not found.");
+    error.status = 401;
+    return next(error);
+  }
+  if (!gigId) {
+    const error = new Error("Bad Request: Gig ID is required in URL parameter.");
+    error.status = 400;
+    return next(error);
+  }
+
   try {
-    const { clerk_id, gig_id } = req.body;
-    if (!clerk_id || !gig_id) {
-      return res.status(400).json({ success: false, message: 'Missing required fields: clerk_id or gig_id' });
+    const gigExists = await models.Gig.findByPk(gigId);
+    if (!gigExists) {
+      const error = new Error("Not Found: Gig not found.");
+      error.status = 404;
+      return next(error);
     }
-    const savedGig = await models.SavedGig.create({ clerk_id, gig_id });
-    console.log(`Gig saved: id=${savedGig.id}`);
-    return res.status(201).json({ success: true, message: 'Gig saved successfully', savedGig });
+
+    const [savedGig, created] = await models.SavedGig.findOrCreate({
+      where: {
+        clerk_id: currentUserClerkId,
+        gig_id: gigId
+      },
+      defaults: {
+        clerk_id: currentUserClerkId,
+        gig_id: gigId,
+        saved_date: new Date()
+      }
+    });
+
+    if (created) {
+      console.log(`User ${currentUserClerkId} saved gig ${gigId}`);
+      res.status(201).json({ success: true, message: 'Gig saved successfully.', savedGig });
+    } else {
+      console.log(`User ${currentUserClerkId} attempted to save already saved gig ${gigId}`);
+      res.status(200).json({ success: true, message: 'Gig was already saved.', savedGig });
+    }
+
   } catch (error) {
+    if (error.name === 'SequelizeForeignKeyConstraintError') {
+        const err = new Error("Bad Request: Invalid Gig ID provided.");
+        err.status = 400;
+        return next(err);
+    }
     console.error('Error saving gig:', error.message);
-    return res.status(500).json({ success: false, message: 'Error saving gig', error: error.message });
+    next(error);
   }
 };
 
-// Lấy tất cả gig đã lưu (phân trang)
-export const getAllSavedGigs = async (req, res, next) => {
+export const unsaveGig = async (req, res, next) => {
+  const currentUserClerkId = req.auth?.userId;
+  const gigId = req.params.gigId;
+
+  if (!currentUserClerkId) {
+    const error = new Error("Unauthorized: User ID not found.");
+    error.status = 401;
+    return next(error);
+  }
+  if (!gigId) {
+    const error = new Error("Bad Request: Gig ID is required in URL parameter.");
+    error.status = 400;
+    return next(error);
+  }
+
   try {
-    const { page = 1, limit = 10, clerk_id } = req.query;
-    if (!clerk_id) {
-      return res.status(400).json({ success: false, message: 'Missing required query: clerk_id' });
+    const result = await models.SavedGig.destroy({
+      where: {
+        clerk_id: currentUserClerkId,
+        gig_id: gigId
+      }
+    });
+
+    if (result === 0) {
+      const error = new Error("Not Found: Saved gig entry not found for this user and gig ID.");
+      error.status = 404;
+      return next(error);
     }
-    const offset = (page - 1) * limit;
-    const savedGigs = await models.SavedGig.findAndCountAll({
-      where: { clerk_id },
-      limit: parseInt(limit),
-      offset: parseInt(offset),
+
+    console.log(`User ${currentUserClerkId} unsaved gig ${gigId}`);
+    res.status(204).send();
+
+  } catch (error) {
+    console.error('Error unsaving gig:', error.message);
+    next(error);
+  }
+};
+
+export const getSavedGigs = async (req, res, next) => {
+  const currentUserClerkId = req.auth?.userId;
+
+  if (!currentUserClerkId) {
+    const error = new Error("Unauthorized: User ID not found.");
+    error.status = 401;
+    return next(error);
+  }
+
+  try {
+    const { page = 1, limit = 10 } = req.query;
+    const offset = (parseInt(page, 10) - 1) * parseInt(limit, 10);
+
+    const savedGigsData = await models.SavedGig.findAndCountAll({
+      where: { clerk_id: currentUserClerkId },
+      include: [
+        {
+          model: models.Gig,
+          attributes: ['id', 'title', 'starting_price', 'delivery_time', 'gig_image', 'seller_clerk_id'],
+        }
+      ],
+      limit: parseInt(limit, 10),
+      offset: offset,
+      order: [['saved_date', 'DESC']]
     });
-    return res.status(200).json({
+
+    res.status(200).json({
       success: true,
-      total: savedGigs.count,
-      pages: Math.ceil(savedGigs.count / limit),
-      savedGigs: savedGigs.rows,
+      totalItems: savedGigsData.count,
+      totalPages: Math.ceil(savedGigsData.count / parseInt(limit, 10)),
+      currentPage: parseInt(page, 10),
+      savedGigs: savedGigsData.rows.map(sg => sg.Gig)
     });
+
   } catch (error) {
     console.error('Error fetching saved gigs:', error.message);
-    return res.status(500).json({ success: false, message: 'Error fetching saved gigs', error: error.message });
-  }
-};
-
-// Lấy gig đã lưu theo ID
-export const getSavedGigById = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const savedGig = await models.SavedGig.findByPk(id);
-    if (!savedGig) {
-      return res.status(404).json({ success: false, message: 'Saved gig not found' });
-    }
-    return res.status(200).json({ success: true, savedGig });
-  } catch (error) {
-    console.error('Error fetching saved gig:', error.message);
-    return res.status(500).json({ success: false, message: 'Error fetching saved gig', error: error.message });
-  }
-};
-
-// Xóa gig đã lưu
-export const deleteSavedGig = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const savedGig = await models.SavedGig.findByPk(id);
-    if (!savedGig) {
-      return res.status(404).json({ success: false, message: 'Saved gig not found' });
-    }
-    await savedGig.destroy();
-    console.log(`Saved gig deleted: id=${id}`);
-    return res.status(200).json({ success: true, message: 'Saved gig deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting saved gig:', error.message);
-    return res.status(500).json({ success: false, message: 'Error deleting saved gig', error: error.message });
+    next(error);
   }
 };
