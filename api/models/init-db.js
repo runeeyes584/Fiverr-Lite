@@ -5,7 +5,7 @@ async function initDb() {
     await sequelize.authenticate();
     console.log("Kết nối MySQL thành công");
 
-    await sequelize.sync({ force: true }); //force true để xóa và tạo lại tất cả các bảng, có thể thay đổi thành false nếu không muốn xóa dữ liệu cũ
+    await sequelize.sync({ force: true}); //force true để xóa và tạo lại tất cả các bảng, có thể thay đổi thành false nếu không muốn xóa dữ liệu cũ
     console.log("Tạo database thành công");
 
     // Tạo job_type
@@ -130,6 +130,12 @@ async function initDb() {
         rating: 4,
         comment: "Great graphic design!",
       },
+    ]);
+
+    // Tạo seeker_skills
+    await models.SeekerSkill.bulkCreate([
+      { clerk_id: users[2].clerk_id, skill_id: 1 }, // user_3 with JavaScript skill
+      { clerk_id: users[2].clerk_id, skill_id: 2 }, // user_3 with Graphic Design skill
     ]);
 
     console.log("Thêm dữ liệu mẫu thành công");

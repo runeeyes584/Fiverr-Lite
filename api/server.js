@@ -37,6 +37,7 @@ import userSearchHistoryRoute from "./routes/userSearchHistory.route.js";
 // Tải file .env từ thư mục hiện tại
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
+
 const app = express();
 
 const clerk = new Clerk({ apiKey: process.env.CLERK_SECRET_KEY });
@@ -94,7 +95,7 @@ app.use((err, req, res, next) => {
 
 // Đồng bộ database và khởi động server
 sequelize
-  .sync({ force: true })
+  .sync({ force: false }) // Đặt force: false để không xóa dữ liệu cũ
   .then(() => {
     console.log("Database synced successfully");
     app.listen(8800, () => {

@@ -8,12 +8,13 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
+console.log("Loaded DB_NAME in Sequelize-mysql.js:", process.env.DB_NAME);
 
 const sequelize = new Sequelize({
   dialect: "mysql",
   host: process.env.DB_HOST || "localhost",
   username: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "10022004",
+  password: process.env.DB_PASSWORD || "151004abyss",
   database: process.env.DB_NAME || "fiverr_new",
   port: 3306,
 });
@@ -95,9 +96,9 @@ const defineRelations = (models) => {
   models.AdminLog.belongsTo(models.User, { foreignKey: "target_clerk_id", targetKey: "clerk_id" });
   models.AdminLog.belongsTo(models.Gig, { foreignKey: "gig_id" });
 
-  models.User.belongsToMany(models.Skills, { through: models.SeekerSkill, foreignKey: "clerk_id" });
-  models.Skills.belongsToMany(models.User, { through: models.SeekerSkill, foreignKey: "skill_id" });
-
+  models.SeekerSkill.belongsTo(models.User, { foreignKey: "clerk_id", targetKey: "clerk_id" });
+  models.User.hasMany(models.SeekerSkill, { foreignKey: "clerk_id", sourceKey: "clerk_id" });
+  
   models.Gig.belongsToMany(models.Skills, { through: models.GigSkill, foreignKey: "gig_id" });
   models.Skills.belongsToMany(models.Gig, { through: models.GigSkill, foreignKey: "skill_id" });
 
