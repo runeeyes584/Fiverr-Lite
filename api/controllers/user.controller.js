@@ -1,6 +1,5 @@
 import { Webhook } from "svix";
 import { models } from "../models/Sequelize-mysql.js"; // Đảm bảo đường dẫn đúng
-import { Clerk } from '@clerk/clerk-sdk-node';
 
 
 export const handleClerkWebhook = async (req, res) => {
@@ -119,85 +118,6 @@ export const handleClerkWebhook = async (req, res) => {
     return res.status(200).send("Acknowledged (Server processing error)");
   }
 };
-
-
-// Tạo user mới qua Clerk API
-export const createUser = async (req, res, next) => {
-  try {
-    const { email, username, password, publicMetadata } = req.body || {};
-
-    // Kiểm tra các trường bắt buộc
-    if (!email || !username || !password) {
-      return res.status(400).json({ success: false, message: 'Missing required fields: email, username, or password' });
-    }
-
-    const clerkClient = new Clerk({ secretKey: process.env.CLERK_SECRET_KEY });
-    const newUser = await clerkClient.users.createUser({
-      emailAddress: [email],
-      username,
-      password,
-      publicMetadata: publicMetadata || { userTypeId: 1, isSeller: false, country: 'Việt Nam' },
-    });
-
-    console.log(`User created via API: clerk_id=${newUser.id}`);
-    return res.status(201).json({ success: true, user: newUser });
-  } catch (err) {
-    console.error('Error creating user:', {
-      message: err.message,
-      status: err.status,
-      errors: err.errors || err.response?.data || 'No additional error details'
-    });
-    return res.status(err.status || 500).json({
-      success: false,
-      message: 'Error creating user',
-      error: err.message,
-      details: err.errors || err.response?.data || 'No additional error details'
-    });
-  }
-};
-
-
-// Cập nhật user qua Clerk API
-export const updateUser = async (req, res, next) => {
-  try {
-    const { clerkId } = req.params;
-    const { email, username, publicMetadata } = req.body;
-
-    if (!email && !username && !publicMetadata) {
-      return res.status(400).json({ success: false, message: 'No fields provided to update' });
-    }
-
-    const clerkClient = new Clerk({ secretKey: process.env.CLERK_SECRET_KEY });
-    const updatedUser = await clerkClient.users.updateUser(clerkId, {
-      ...(email && { emailAddress: [email] }),
-      ...(username && { username }),
-      ...(publicMetadata && { publicMetadata }),
-    });
-
-    console.log(`User updated via API: clerk_id=${clerkId}`);
-    return res.status(200).json({ success: true, user: updatedUser });
-  } catch (err) {
-    console.error(`Error updating user ${req.params.clerkId}:`, err.message);
-    return next(err);
-  }
-};
-
-// Xóa user qua Clerk API
-export const deleteUser = async (req, res, next) => {
-  try {
-    const { clerkId } = req.params;
-
-    const clerkClient = new Clerk({ secretKey: process.env.CLERK_SECRET_KEY }); 
-    await clerkClient.users.deleteUser(clerkId);
-
-    console.log(`User deleted via API: clerk_id=${clerkId}`);
-    return res.status(200).json({ success: true, message: `User ${clerkId} deleted` });
-  } catch (err) {
-    console.error(`Error deleting user ${req.params.clerkId}:`, err.message);
-    return next(err);
-  }
-};
-
 
 
 
