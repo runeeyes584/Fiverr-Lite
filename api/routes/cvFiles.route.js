@@ -1,18 +1,19 @@
 import express from 'express';
-import {createCVFile, getAllCVFiles, getCVFileById, updateCVFile, deleteCVFile} from '../controllers/cvFiles.controller.js';
+import {
+    createCVFile,
+    deleteCVFile,
+    getCVFileById,
+    getCVFilesByClerkId,
+    updateCVFile
+} from '../controllers/cvFiles.controller.js';
 import requireAuth from '../middleware/requireAuth.js';
 
 const router = express.Router();
 
-// Lấy danh sách tất cả các CV file
-router.get('/', getAllCVFiles);
-// Lấy CV file theo id
-router.get('/:id', getCVFileById);
-// Tạo CV file mới
 router.post('/', requireAuth, createCVFile);
-// Cập nhật CV file
-router.patch('/:id', requireAuth, updateCVFile);
-// Xóa CV file
+router.get('/user/:clerk_id', requireAuth, getCVFilesByClerkId);
+router.get('/:id', requireAuth, getCVFileById);
+router.put('/:id', requireAuth, updateCVFile);
 router.delete('/:id', requireAuth, deleteCVFile);
 
 export default router;
