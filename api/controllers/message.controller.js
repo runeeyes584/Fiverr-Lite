@@ -25,12 +25,10 @@ export const createMessage = async (req, res, next) => {
 export const getAllMessages = async (req, res, next) => {
   try {
     const { page = 1, limit = 10, order_id } = req.query;
-    if (!order_id) {
-      return res.status(400).json({ success: false, message: 'Missing required query: order_id' });
-    }
     const offset = (page - 1) * limit;
+    const whereClause = order_id ? { order_id } : {}; // Nếu có order_id thì lọc, không thì lấy tất cả
     const messages = await models.Message.findAndCountAll({
-      where: { order_id },
+      where: whereClause,
       limit: parseInt(limit),
       offset: parseInt(offset),
     });

@@ -1,11 +1,14 @@
-
-// server.js
+// ✅ Modified server.js with Socket.IO support for real-time chat
 import { Clerk } from "@clerk/clerk-sdk-node";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
+import http from "http";
 import path from "path";
+import { Server } from "socket.io";
 import { sequelize } from "./models/Sequelize-mysql.js";
+
+// All your routes
 import adminLogRoute from "./routes/adminLog.route.js";
 import categoryRoute from "./routes/category.route.js";
 import companyRoute from "./routes/company.route.js";
@@ -31,28 +34,26 @@ import seekerSkillRoute from "./routes/seekerSkill.route.js";
 import skillsRoute from "./routes/skills.route.js";
 import userRoute from "./routes/user.route.js";
 import userSearchHistoryRoute from "./routes/userSearchHistory.route.js";
+import messageSocketHandler from "./socket/messageSocket.js";
 
-
-
-// Tải file .env từ thư mục hiện tại
+// .env
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
-
 const app = express();
-
 const clerk = new Clerk({ apiKey: process.env.CLERK_SECRET_KEY });
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    credentials: true,
+  },
+});
 
-// Kiểm tra kết nối Sequelize
-sequelize
-  .authenticate()
-  .then(() => {
-    console.log("Đã kết nối MySQL với Sequelize");
-  })
-  .catch((err) => {
-    console.error("Lỗi kết nối MySQL:", err.message);
-  });
-  
-  
+// Sequelize connection check
+sequelize.authenticate()
+  .then(() => console.log("Đã kết nối MySQL với Sequelize"))
+  .catch((err) => console.error("Lỗi kết nối MySQL:", err.message));
+
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 
 app.use("/api/users", userRoute);
@@ -60,6 +61,7 @@ app.use("/api/users", userRoute);
 app.use(express.json());
 
 // Routes
+
 app.use("/api/adminLog", adminLogRoute);
 app.use("/api/categories", categoryRoute);
 app.use("/api/companies", companyRoute);
@@ -85,23 +87,22 @@ app.use("/api/seekerSkills", seekerSkillRoute);
 app.use("/api/skills", skillsRoute);
 app.use("/api/userSearchHistory", userSearchHistoryRoute);
 
-
-// Error handling middleware
+// Error middleware
 app.use((err, req, res, next) => {
   const errorStatus = err.status || 500;
   const errorMessage = err.message || "Something went wrong!";
   return res.status(errorStatus).send(errorMessage);
 });
 
-// Đồng bộ database và khởi động server
-sequelize
-  .sync({ force: false }) // Đặt force: false để không xóa dữ liệu cũ
+// Socket handler
+messageSocketHandler(io);
+
+// Sync database & start server
+sequelize.sync({ force: false })
   .then(() => {
     console.log("Database synced successfully");
-    app.listen(8800, () => {
+    server.listen(8800, () => {
       console.log("Backend server is running on port 8800!");
     });
   })
-  .catch((err) => {
-    console.error("Lỗi đồng bộ database:", err.message);
-  });
+  .catch((err) => console.error("Lỗi đồng bộ database:", err.message));

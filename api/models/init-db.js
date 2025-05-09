@@ -211,6 +211,98 @@ async function initDb() {
       { clerk_id: users[2].clerk_id, skill_id: 2 }, // user_3 with Graphic Design skill
     ]);
 
+    // Tạo companies
+    const companies = await models.Company.bulkCreate([
+      {
+        clerk_id: users[0].clerk_id, // Associated with user_1
+        company_name: "TechCorp VN",
+        profile_description: "A leading tech company in Vietnam",
+        establishment_date: "2020-01-01",
+        company_website_url: "https://techcorp.vn",
+        company_email: "contact@techcorp.vn",
+        verified_at: "2020-02-01",
+        location: "Hanoi, Vietnam",
+      },
+      {
+        clerk_id: users[1].clerk_id, // Associated with user_2
+        company_name: "DesignWorks USA",
+        profile_description: "Creative design agency in the USA",
+        establishment_date: "2018-05-15",
+        company_website_url: "https://designworks.com",
+        company_email: "info@designworks.com",
+        verified_at: "2018-06-01",
+        location: "New York, USA",
+      },
+    ]);
+
+    // Tạo company_images
+    await models.CompanyImage.bulkCreate([
+      {
+        company_id: companies[0].id, // Associated with TechCorp VN
+        company_image: "https://example.com/techcorp_logo.jpg",
+      },
+      {
+        company_id: companies[0].id, // Associated with TechCorp VN
+        company_image: "https://example.com/techcorp_icon.jpg",
+      },
+      {
+        company_id: companies[0].id, // Associated with TechCorp VN
+        company_image: "https://example.com/techcorp_frame.jpg",
+      },
+      {
+        company_id: companies[1].id, // Associated with DesignWorks USA
+        company_image: "https://example.com/designworks_logo.jpg",
+      },
+    ]);
+
+    // Tạo contact_forms
+    await models.ContactForm.bulkCreate([
+      {
+        clerk_id: users[2].clerk_id, // Associated with user_3
+        name: "Amit Sharma",
+        email: "amit.sharma@example.com",
+        message: "I would like to inquire about job opportunities.",
+        submitted_at: "2025-01-06",
+      },
+      {
+        clerk_id: null, // Guest user (no clerk_id)
+        name: "John Doe",
+        email: "john.doe@example.com",
+        message: "I have a question about your services.",
+        submitted_at: "2025-01-07",
+      },
+    ]);
+
+    // Tạo experience_details
+    await models.ExperienceDetail.bulkCreate([
+      {
+        clerk_id: users[2].clerk_id, // Associated with user_3
+        certificate_degree_name: "Bachelor of Technology",
+        major: "Computer Science",
+        cgpa: 8.5,
+        start_date: "2018-06-01",
+        end_date: "2022-05-30",
+        is_current_job: false,
+        job_title: "Software Engineer Intern",
+        company_name: "TechCorp VN",
+        location: "Hanoi, Vietnam",
+        description: "Developed web applications using React and Node.js",
+      },
+      {
+        clerk_id: users[2].clerk_id, // Associated with user_3
+        certificate_degree_name: "Master of Technology",
+        major: "Software Engineering",
+        cgpa: 9.0,
+        start_date: "2022-06-01",
+        end_date: null,
+        is_current_job: true,
+        job_title: "Software Engineer",
+        company_name: "DesignWorks USA",
+        location: "New York, USA",
+        description: "Working on API integrations and UI design",
+      },
+    ]);
+
     console.log("Thêm dữ liệu mẫu thành công");
   } catch (err) {
     console.error("Lỗi khi khởi tạo database:", err.message);
