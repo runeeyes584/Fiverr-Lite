@@ -1,4 +1,4 @@
-import { sequelize, models } from "./Sequelize-mysql.js";
+import { models, sequelize } from "./Sequelize-mysql.js";
 
 async function initDb() {
   try {
@@ -16,8 +16,81 @@ async function initDb() {
 
     // Tạo category
     const categories = await models.Category.bulkCreate([
-      { name: "Development" },
-      { name: "Design" },
+      {
+        "name": "Web Development",
+        "desc": "Build stunning websites",
+        "img": "."
+      },
+      {
+        "name": "Graphic Illustration",
+        "desc": "Create unique artwork",
+        "img": "https://images.unsplash.com/photo-1546410531-bb4ca2f6e5c8"
+      },
+      {
+        "name": "SEO Services",
+        "desc": "Boost your rankings",
+        "img": "https://images.unsplash.com/photo-1542744173-8e7e53415bb0"
+      },
+      {
+        "name": "Social Media Management",
+        "desc": "Enhance your online reach",
+        "img": "https://images.unsplash.com/photo-1611162617210-7b540f1e4b3e"
+      },
+      {
+        "name": "Animation Design",
+        "desc": "Bring ideas to life",
+        "img": "https://images.unsplash.com/photo-1620207418302-439b387441b0"
+      },
+      {
+        "name": "Content Creation",
+        "desc": "Engage with quality content",
+        "img": "https://images.unsplash.com/photo-1498050108023-c5249f4df085"
+      },
+      {
+        "name": "E-commerce Solutions",
+        "desc": "Grow your online store",
+        "img": "https://images.unsplash.com/photo-1556740738-b6a63e27c4df"
+      },
+      {
+        "name": "UI/UX Design",
+        "desc": "Design user-friendly interfaces",
+        "img": "https://images.unsplash.com/photo-1593642634367-d91a5d8e3525"
+      },
+      {
+        "name": "Voice Acting",
+        "desc": "Voice your brand",
+        "img": "https://images.unsplash.com/photo-1508704019882-f9cf40e769ab"
+      },
+      {
+        "name": "Mobile App Development",
+        "desc": "Create powerful apps",
+        "img": "https://images.unsplash.com/photo-1580894732444-8ecded7900cd"
+      },
+      {
+        "name": "Video Editing",
+        "desc": "Polish your videos",
+        "img": "https://images.unsplash.com/photo-1545231027-637d2f6211f8"
+      },
+      {
+        "name": "Copywriting",
+        "desc": "Write compelling copy",
+        "img": "https://images.unsplash.com/photo-1508780709619-79562169bc64"
+      },
+      {
+        "name": "Game Development",
+        "desc": "Build immersive games",
+        "img": "https://images.unsplash.com/photo-1511884642898-4c92249e20b6"
+      },
+      {
+        "name": "Interior Design",
+        "desc": "Transform your space",
+        "img": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c"
+      },
+      {
+        "name": "Event Planning",
+        "desc": "Plan memorable events",
+        "img": "https://images.unsplash.com/photo-1511795409834-ef04bbd61622"
+      },
     ]);
 
     // Tạo skills

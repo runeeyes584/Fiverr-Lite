@@ -1,89 +1,92 @@
 import { models } from '../models/Sequelize-mysql.js';
 
-// Tạo file CV
-export const createCVFile = async (req, res, next) => {
+const validateCVFile = (data) => {
+  const errors = {};
+  if (!data.clerk_id) errors.clerk_id = "Clerk ID is required";
+  if (!data.file_url) errors.file_url = "File URL is required";
+  if (!data.file_name) errors.file_name = "File name is required";
+  return Object.keys(errors).length > 0 ? errors : null;
+};
+
+export const createCVFile = async (req, res) => {
+  const errors = validateCVFile(req.body);
+  if (errors) {
+    return res.status(400).json({ success: false, errors });
+  }
+
   try {
-    const { clerk_id, file_url, file_name, is_default, file_size, file_type } = req.body;
-    if (!clerk_id || !file_url) {
-      return res.status(400).json({ success: false, message: 'Missing required fields: clerk_id or file_url' });
-    }
-    const cv = await models.CVFile.create({
-      clerk_id,
-      file_url,
-      file_name,
-      is_default,
-      file_size,
-      file_type,
-    });
-    console.log(`CV file created: id=${cv.id}`);
-    return res.status(201).json({ success: true, message: 'CV file created successfully', cv });
+    const cvFile = await models.CVFile.create(req.body);
+    return res.status(201).json({ success: true, message: 'CV file created successfully', cvFile });
   } catch (error) {
-    console.error('Error creating CV file:', error.message);
+    console.error('Error creating CV file:', error);
     return res.status(500).json({ success: false, message: 'Error creating CV file', error: error.message });
   }
 };
 
-// Lấy tất cả file CV theo clerk_id
-export const getAllCVFiles = async (req, res, next) => {
+export const getCVFilesByClerkId = async (req, res) => {
   try {
-    const { clerk_id } = req.query;
-    if (!clerk_id) {
-      return res.status(400).json({ success: false, message: 'Missing required query: clerk_id' });
-    }
-    const cvs = await models.CVFile.findAll({ where: { clerk_id } });
-    return res.status(200).json({ success: true, cvs });
+    const { clerk_id } = req.params;
+    const cvFiles = await models.CVFile.findAll({
+      where: { clerk_id: clerk_id }
+    });
+    return res.status(200).json({ success: true, cvFiles });
   } catch (error) {
-    console.error('Error fetching CV files:', error.message);
-    return res.status(500).json({ success: false, message: 'Error fetching CV files', error: error.message });
+    console.error('Error getting CV files:', error);
+    return res.status(500).json({ success: false, message: 'Error getting CV files', error: error.message });
   }
 };
 
-// Lấy file CV theo ID
-export const getCVFileById = async (req, res, next) => {
+export const getCVFileById = async (req, res) => {
   try {
     const { id } = req.params;
-    const cv = await models.CVFile.findByPk(id);
-    if (!cv) {
+    const cvFile = await models.CVFile.findByPk(id);
+    if (!cvFile) {
       return res.status(404).json({ success: false, message: 'CV file not found' });
     }
-    return res.status(200).json({ success: true, cv });
+    return res.status(200).json({ success: true, cvFile });
   } catch (error) {
-    console.error('Error fetching CV file:', error.message);
-    return res.status(500).json({ success: false, message: 'Error fetching CV file', error: error.message });
+    console.error('Error getting CV file by ID:', error);
+    return res.status(500).json({ success: false, message: 'Error getting CV file by ID', error: error.message });
   }
 };
 
-// Cập nhật file CV
-export const updateCVFile = async (req, res, next) => {
+export const updateCVFile = async (req, res) => {
   try {
     const { id } = req.params;
-    const { file_url, file_name, is_default, file_size, file_type } = req.body;
-    const cv = await models.CVFile.findByPk(id);
-    if (!cv) {
+    const errors = validateCVFile(req.body);
+    if (errors) {
+      return res.status(400).json({ success: false, errors });
+    }
+
+    const result = await models.CVFile.update(req.body, {
+      where: { id: id }
+    });
+
+    if (result[0] === 0) {
       return res.status(404).json({ success: false, message: 'CV file not found' });
     }
-    await cv.update({ file_url, file_name, is_default, file_size, file_type });
-    console.log(`CV file updated: id=${id}`);
-    return res.status(200).json({ success: true, message: 'CV file updated successfully', cv });
+
+    const updatedCVFile = await models.CVFile.findByPk(id);
+    return res.status(200).json({ success: true, message: 'CV file updated successfully', cvFile: updatedCVFile });
+
   } catch (error) {
-    console.error('Error updating CV file:', error.message);
+    console.error('Error updating CV file:', error);
     return res.status(500).json({ success: false, message: 'Error updating CV file', error: error.message });
   }
 };
 
-// Xóa file CV
-export const deleteCVFile = async (req, res, next) => {
+export const deleteCVFile = async (req, res) => {
   try {
     const { id } = req.params;
-    const cv = await models.CVFile.findByPk(id);
-    if (!cv) {
+    const result = await models.CVFile.destroy({
+      where: { id: id }
+    });
+    if (result === 0) {
       return res.status(404).json({ success: false, message: 'CV file not found' });
     }
-    await cv.destroy();
-    console.log(`CV file deleted: id=${id}`);
     return res.status(200).json({ success: true, message: 'CV file deleted successfully' });
   } catch (error) {
-    console.error('Error deleting CV file:', error.message);
+    console.error('Error deleting CV file:', error);
     return res.status(500).json({ success: false, message: 'Error deleting CV file', error: error.message });
   }
 };
