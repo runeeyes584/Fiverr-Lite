@@ -3,8 +3,10 @@ import { models } from '../models/Sequelize-mysql.js';
 // Tạo ảnh công ty
 export const createCompanyImage = async (req, res, next) => {
   try {
-    const { company_id, company_image } = req.body;
+    const { company_id } = req.params;
+    const { company_image } = req.body;
     if (!company_id || !company_image) {
+      console.warn('Validation failed: Missing required fields: company_id or company_image');
       return res.status(400).json({ success: false, message: 'Missing required fields: company_id or company_image' });
     }
     const image = await models.CompanyImage.create({ company_id, company_image });
@@ -19,30 +21,16 @@ export const createCompanyImage = async (req, res, next) => {
 // Lấy tất cả ảnh công ty theo company_id
 export const getAllCompanyImages = async (req, res, next) => {
   try {
-    const { company_id } = req.query;
+    const { company_id } = req.params;
     if (!company_id) {
-      return res.status(400).json({ success: false, message: 'Missing required query: company_id' });
+      console.warn('Validation failed: Missing required parameter company_id');
+      return res.status(400).json({ success: false, message: 'Missing required parameter: company_id' });
     }
     const images = await models.CompanyImage.findAll({ where: { company_id } });
     return res.status(200).json({ success: true, images });
   } catch (error) {
     console.error('Error fetching company images:', error.message);
     return res.status(500).json({ success: false, message: 'Error fetching company images', error: error.message });
-  }
-};
-
-// Lấy ảnh công ty theo ID
-export const getCompanyImageById = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const image = await models.CompanyImage.findByPk(id);
-    if (!image) {
-      return res.status(404).json({ success: false, message: 'Company image not found' });
-    }
-    return res.status(200).json({ success: true, image });
-  } catch (error) {
-    console.error('Error fetching company image:', error.message);
-    return res.status(500).json({ success: false, message: 'Error fetching company image', error: error.message });
   }
 };
 

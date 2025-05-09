@@ -3,10 +3,15 @@ import { models } from '../models/Sequelize-mysql.js';
 // Tạo chi tiết kinh nghiệm
 export const createExperienceDetail = async (req, res, next) => {
   try {
-    const { clerk_id, certificate_degree_name, major, cgpa, start_date, end_date, is_current_job, job_title, company_name, location, description } = req.body;
-    if (!clerk_id || !job_title) {
-      return res.status(400).json({ success: false, message: 'Missing required fields: clerk_id or job_title' });
+    const clerk_id = req.user.clerk_id; // Lấy clerk_id từ req.user (requireAuth)
+    const { certificate_degree_name, major, cgpa, start_date, end_date, is_current_job, job_title, company_name, location, description } = req.body;
+    
+    // Yêu cầu các trường bắt buộc
+    if (!job_title || !company_name || !start_date) {
+      console.warn('Validation failed: Missing required fields: job_title, company_name, or start_date');
+      return res.status(400).json({ success: false, message: 'Missing required fields: job_title, company_name, or start_date' });
     }
+
     const experience = await models.ExperienceDetail.create({
       clerk_id,
       certificate_degree_name,
@@ -31,9 +36,10 @@ export const createExperienceDetail = async (req, res, next) => {
 // Lấy tất cả chi tiết kinh nghiệm theo clerk_id
 export const getAllExperienceDetails = async (req, res, next) => {
   try {
-    const { clerk_id } = req.query;
+    const { clerk_id } = req.params; // Sử dụng params thay vì query
     if (!clerk_id) {
-      return res.status(400).json({ success: false, message: 'Missing required query: clerk_id' });
+      console.warn('Validation failed: Missing required parameter clerk_id');
+      return res.status(400).json({ success: false, message: 'Missing required parameter: clerk_id' });
     }
     const experiences = await models.ExperienceDetail.findAll({ where: { clerk_id } });
     return res.status(200).json({ success: true, experiences });
@@ -43,30 +49,23 @@ export const getAllExperienceDetails = async (req, res, next) => {
   }
 };
 
-// Lấy chi tiết kinh nghiệm theo ID
-export const getExperienceDetailById = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const experience = await models.ExperienceDetail.findByPk(id);
-    if (!experience) {
-      return res.status(404).json({ success: false, message: 'Experience not found' });
-    }
-    return res.status(200).json({ success: true, experience });
-  } catch (error) {
-    console.error('Error fetching experience:', error.message);
-    return res.status(500).json({ success: false, message: 'Error fetching experience', error: error.message });
-  }
-};
-
 // Cập nhật chi tiết kinh nghiệm
 export const updateExperienceDetail = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const clerk_id = req.user.clerk_id; // Lấy clerk_id từ req.user
     const { certificate_degree_name, major, cgpa, start_date, end_date, is_current_job, job_title, company_name, location, description } = req.body;
+
     const experience = await models.ExperienceDetail.findByPk(id);
     if (!experience) {
       return res.status(404).json({ success: false, message: 'Experience not found' });
     }
+
+    // Kiểm tra quyền sở hữu
+    if (experience.clerk_id !== clerk_id) {
+      return res.status(403).json({ success: false, message: 'Unauthorized: You can only update your own experience' });
+    }
+
     await experience.update({
       certificate_degree_name,
       major,
@@ -91,10 +90,18 @@ export const updateExperienceDetail = async (req, res, next) => {
 export const deleteExperienceDetail = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const clerk_id = req.user.clerk_id; // Lấy clerk_id từ req.user
+
     const experience = await models.ExperienceDetail.findByPk(id);
     if (!experience) {
       return res.status(404).json({ success: false, message: 'Experience not found' });
     }
+
+    // Kiểm tra quyền sở hữu
+    if (experience.clerk_id !== clerk_id) {
+      return res.status(403).json({ success: false, message: 'Unauthorized: You can only delete your own experience' });
+    }
+
     await experience.destroy();
     console.log(`Experience deleted: id=${id}`);
     return res.status(200).json({ success: true, message: 'Experience deleted successfully' });

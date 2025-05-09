@@ -1,14 +1,14 @@
 import express from 'express';
-import {createExperienceDetail, getAllExperienceDetails, getExperienceDetailById, deleteExperienceDetail, updateExperienceDetail} from '../controllers/experienceDetail.controller.js';
+import {createExperienceDetail, getAllExperienceDetails, deleteExperienceDetail, updateExperienceDetail} from '../controllers/experienceDetail.controller.js';
 import requireAuth from '../middleware/requireAuth.js';
 
 const router = express.Router();
 
-// Lấy danh sách tất cả các experience detail
-router.get('/', getAllExperienceDetails);
-// Lấy experience detail theo id
-router.get('/:id', getExperienceDetailById);
-// Tạo experience detail mới
+
+
+// Lấy danh sách experience detail theo clerk_id
+router.get('/clerk/:clerk_id', getAllExperienceDetails);
+// Tạo experience detail mới theo clerk_id
 router.post('/', requireAuth, createExperienceDetail);
 // Cập nhật experience detail
 router.patch('/:id', requireAuth, updateExperienceDetail);

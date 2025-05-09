@@ -17,38 +17,39 @@ export const createContactForm = async (req, res, next) => {
 };
 
 // Lấy tất cả biểu mẫu liên hệ (phân trang)
-export const getAllContactForms = async (req, res, next) => {
+// export const getAllContactForms = async (req, res, next) => {
+//   try {
+//     const { page = 1, limit = 10 } = req.query;
+//     const offset = (page - 1) * limit;
+//     const forms = await models.ContactForm.findAndCountAll({
+//       limit: parseInt(limit),
+//       offset: parseInt(offset),
+//     });
+//     return res.status(200).json({
+//       success: true,
+//       total: forms.count,
+//       pages: Math.ceil(forms.count / limit),
+//       forms: forms.rows,
+//     });
+//   } catch (error) {
+//     console.error('Error fetching contact forms:', error.message);
+//     return res.status(500).json({ success: false, message: 'Error fetching contact forms', error: error.message });
+//   }
+// };
+
+// Lấy tất cả biểu mẫu liên hệ theo clerk_id
+export const getContactFormsByUser = async (req, res, next) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
-    const offset = (page - 1) * limit;
-    const forms = await models.ContactForm.findAndCountAll({
-      limit: parseInt(limit),
-      offset: parseInt(offset),
-    });
-    return res.status(200).json({
-      success: true,
-      total: forms.count,
-      pages: Math.ceil(forms.count / limit),
-      forms: forms.rows,
-    });
+    const { clerk_id } = req.params;
+    if (!clerk_id) {
+      console.warn('Validation failed: Missing required parameter clerk_id');
+      return res.status(400).json({ success: false, message: 'Missing required parameter: clerk_id' });
+    }
+    const forms = await models.ContactForm.findAll({ where: { clerk_id } });
+    return res.status(200).json({ success: true, forms });
   } catch (error) {
     console.error('Error fetching contact forms:', error.message);
     return res.status(500).json({ success: false, message: 'Error fetching contact forms', error: error.message });
-  }
-};
-
-// Lấy biểu mẫu liên hệ theo ID
-export const getContactFormById = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const form = await models.ContactForm.findByPk(id);
-    if (!form) {
-      return res.status(404).json({ success: false, message: 'Contact form not found' });
-    }
-    return res.status(200).json({ success: true, form });
-  } catch (error) {
-    console.error('Error fetching contact form:', error.message);
-    return res.status(500).json({ success: false, message: 'Error fetching contact form', error: error.message });
   }
 };
 
