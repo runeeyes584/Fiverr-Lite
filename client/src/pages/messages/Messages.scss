@@ -1,58 +1,91 @@
 .messages {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  height: 100vh;
+  max-width: 600px;
+  margin: 0 auto;
+  background: #f5f5f5;
+  border: 1px solid #ccc;
 
-  .container {
-    width: 1400px;
-    padding: 50px 0px;
+  &__top-form {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    background: #fff;
+    border-bottom: 1px solid #ccc;
 
-    .title {
-      display: flex;
-      justify-content: space-between;
-
-      button {
-        background-color: #1dbf73;
-        color: white;
-        font-weight: 500;
-        border: none;
-        padding: 10px;
-        cursor: pointer;
-      }
-    }
-
-    table {
-      width: 100%;
-
-      tr {
-        height: 100px;
-        th {
-          text-align: left;
-        }
-        td {
-          padding: 10px;
-
-          &:first-child {
-            font-weight: 500;
-          }
-          
-          &:nth-child(2),
-          &:nth-child(3) {
-            color: gray;
-          }
-        }
-
-        button {
-          background-color: #1dbf73;
-          color: white;
-          padding: 10px;
-          border: none;
-          cursor: pointer;
-        }
-
-        &.active {
-          background-color: #1dbf730f;
-        }
-      }
+    input {
+      flex: 1;
+      padding: 8px;
+      font-size: 14px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
     }
   }
+
+  &__content {
+    flex: 1;
+    padding: 16px;
+    background: #e6ded4;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  &__bubble {
+    max-width: 70%;
+    padding: 10px 14px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.4;
+    word-wrap: break-word;
+
+    &.sent {
+      align-self: flex-end;
+      background-color: #dcf8c6;
+    }
+
+    &.received {
+      align-self: flex-start;
+      background-color: #ffffff;
+    }
+  }
+
+  &__input-area {
+    display: flex;
+    padding: 12px;
+    background: #fff;
+    border-top: 1px solid #ccc;
+
+    input {
+      flex: 1;
+      padding: 10px;
+      font-size: 14px;
+      border-radius: 20px;
+      border: 1px solid #ddd;
+      margin-right: 8px;
+    }
+
+    button {
+      width: 42px;
+      height: 42px;
+      border: none;
+      border-radius: 50%;
+      background: #0b93f6;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+    }
+  }
+}
+.messages__content {
+  flex: 1;
+  max-height: 500px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #e6ded4;
+  padding: 16px;
 }

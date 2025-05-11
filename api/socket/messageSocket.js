@@ -1,42 +1,38 @@
-// socket/messageSocket.js
-import { models } from '../models/Sequelize-mysql.js';
+import { sequelize } from "../models/Sequelize-mysql.js";
+import MessageModel from "../models/message.model.js";
 
-export default (io) => {
-  io.on('connection', (socket) => {
-    console.log('New client connected:', socket.id);
+const Message = MessageModel(sequelize);
 
-    // Khi client gửi tin nhắn mới
-    socket.on('sendMessage', async (data) => {
-      const { order_id, sender_clerk_id, receiver_clerk_id, message_content } = data;
+const messageSocketHandler = (io) => {
+  io.on("connection", (socket) => {
+    console.log("🔌 Client connected:", socket.id);
 
-      if (!order_id || !sender_clerk_id || !receiver_clerk_id || !message_content) {
-        return socket.emit('errorMessage', 'Missing required fields');
-      }
+    socket.on("joinRoom", ({ orderId }) => {
+      socket.join(`order_${orderId}`);
+      console.log(`Client ${socket.id} joined room order_${orderId}`);
+    });
+
+    socket.on("sendMessage", async (messageData) => {
+      const { order_id, sender_clerk_id, receiver_clerk_id, message_content } = messageData;
 
       try {
-        const message = await models.Message.create({
+        const newMessage = await Message.create({
           order_id,
           sender_clerk_id,
           receiver_clerk_id,
           message_content,
         });
 
-        // Gửi lại cho cả người gửi và người nhận (giả định họ cùng trong 1 phòng theo order_id)
-        io.to(`order_${order_id}`).emit('newMessage', message);
+        io.to(`order_${order_id}`).emit("receiveMessage", newMessage);
       } catch (error) {
-        console.error('Error saving message:', error.message);
-        socket.emit('errorMessage', 'Failed to save message');
+        console.error("Lỗi khi gửi tin nhắn:", error.message);
       }
     });
 
-    // Tham gia room theo order_id
-    socket.on('joinRoom', (order_id) => {
-      socket.join(`order_${order_id}`);
-      console.log(`Client ${socket.id} joined room order_${order_id}`);
-    });
-
-    socket.on('disconnect', () => {
-      console.log('Client disconnected:', socket.id);
+    socket.on("disconnect", () => {
+      console.log("Client disconnected:", socket.id);
     });
   });
 };
+
+export default messageSocketHandler;

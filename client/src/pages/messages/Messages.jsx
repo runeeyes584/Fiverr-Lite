@@ -1,80 +1,112 @@
-import { Link } from "react-router-dom";
+import { useUser } from "@clerk/clerk-react";
+import { useEffect, useRef, useState } from "react";
+import io from "socket.io-client";
 import "./Messages.scss";
 
+const socket = io("http://localhost:8800", { withCredentials: true });
+
 const Messages = () => {
-  const currentUser = {
-    id: 1,
-    username: "Anna",
-    isSeller: true,
+  const { user } = useUser(); // lấy user từ Clerk
+  const senderId = user?.id || ""; // chính là sender_clerk_id
+
+  const [orderId, setOrderId] = useState("");
+  const [receiverId, setReceiverId] = useState("");
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState([]);
+  const contentRef = useRef(null);
+  const [isNewMessage, setIsNewMessage] = useState(false);
+
+  // Load tin nhắn khi có orderId
+  useEffect(() => {
+    if (!orderId) return;
+
+    socket.emit("joinRoom", { orderId });
+
+    fetch(`http://localhost:8800/api/messages/${orderId}`, {
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setMessages(data);
+        setTimeout(() => scrollToBottom(), 100);
+      })
+      .catch((err) => console.error("Load messages error:", err));
+  }, [orderId]);
+
+  // Nhận realtime
+  useEffect(() => {
+    socket.on("receiveMessage", (newMessage) => {
+      setMessages((prev) => [...prev, newMessage]);
+      setIsNewMessage(true);
+    });
+    return () => {
+      socket.off("receiveMessage");
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isNewMessage) {
+      scrollToBottom();
+      setIsNewMessage(false);
+    }
+  }, [messages, isNewMessage]);
+
+  const scrollToBottom = () => {
+    if (contentRef.current) {
+      contentRef.current.scrollTop = contentRef.current.scrollHeight;
+    }
   };
 
-  const message = `Lorem ipsum dolor sit amet consectetur adipisicing elit. Provident
-  maxime cum corporis esse aspernatur laborum dolorum? Animi
-  molestias aliquam, cum nesciunt, aut, ut quam vitae saepe repellat
-  nobis praesentium placeat.`;
+  const handleSend = () => {
+    if (!message.trim() || !orderId || !senderId || !receiverId) return;
+
+    const msgData = {
+      order_id: orderId,
+      sender_clerk_id: senderId,
+      receiver_clerk_id: receiverId,
+      message_content: message,
+    };
+
+    socket.emit("sendMessage", msgData);
+    setMessage("");
+    setIsNewMessage(true);
+  };
 
   return (
     <div className="messages">
-      <div className="container">
-        <div className="title">
-          <h1>Messages</h1>
-        </div>
-        <table>
-          <tr>
-            <th>{currentUser.isSeller ? "Buyer" : "Seller"}</th>
-            <th>Last Message</th>
-            <th>Date</th>
-            <th>Action</th>
-          </tr>
-          <tr className="active">
-            <td>Charley Sharp</td>
-            <td>
-              <Link to="/message/123" className="link">
-                {message.substring(0, 100)}...
-              </Link>
-            </td>
-            <td>1 hour ago</td>
-            <td>
-              <button>Mark as Read</button>
-            </td>
-          </tr>
-          <tr className="active">
-            <td>John Doe</td>
+      <div className="messages__top-form">
+        <input
+          placeholder="Order ID"
+          value={orderId}
+          onChange={(e) => setOrderId(e.target.value)}
+        />
+        <input
+          placeholder="Receiver Clerk ID"
+          value={receiverId}
+          onChange={(e) => setReceiverId(e.target.value)}
+        />
+      </div>
 
-            <td>
-              <Link to="/message/123" className="link">
-                {message.substring(0, 100)}...
-              </Link>
-            </td>
-            <td>2 hours ago</td>
-            <td>
-              <button>Mark as Read</button>
-            </td>
-          </tr>
-          <tr>
-            <td>Elinor Good</td>
-            <td>
-              <Link to="/message/123" className="link">
-                {message.substring(0, 100)}...
-              </Link>
-            </td>
-            <td>1 day ago</td>
-          </tr>
-          <tr>
-            <td>Garner David </td>
-            <td>
-              <Link to="/message/123" className="link">
-                {message.substring(0, 100)}...
-              </Link>
-            </td>
-            <td>2 days ago</td>
-          </tr>
-          <tr>
-            <td>Troy Oliver</td>
-            <td>{message.substring(0, 100)}</td>
-            <td>1 week ago</td>
-          </tr>
-        </table>
+      <div className="messages__content" ref={contentRef}>
+        {messages.map((msg, index) => (
+          <div
+            key={index}
+            className={`messages__bubble ${msg.sender_clerk_id === senderId ? "sent" : "received"}`}
+          >
+            {msg.message_content}
+          </div>
+        ))}
+      </div>
+
+      <div className="messages__input-area">
+        <input
+          type="text"
+          placeholder="Nhập tin nhắn..."
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleSend()}
+        />
+        <button onClick={handleSend}>➤</button>
       </div>
     </div>
   );

@@ -1,77 +1,36 @@
-import { models } from '../models/Sequelize-mysql.js';
+import { sequelize } from "../models/Sequelize-mysql.js";
+import MessageModel from "../models/message.model.js";
 
-// Tạo tin nhắn
-export const createMessage = async (req, res, next) => {
+const Message = MessageModel(sequelize);
+
+export const createMessage = async (req, res) => {
   try {
     const { order_id, sender_clerk_id, receiver_clerk_id, message_content } = req.body;
-    if (!order_id || !sender_clerk_id || !receiver_clerk_id || !message_content) {
-      return res.status(400).json({ success: false, message: 'Missing required fields' });
-    }
-    const message = await models.Message.create({
+
+    const newMessage = await Message.create({
       order_id,
       sender_clerk_id,
       receiver_clerk_id,
       message_content,
     });
-    console.log(`Message created: id=${message.id}`);
-    return res.status(201).json({ success: true, message: 'Message created successfully', message });
+
+    res.status(201).json(newMessage);
   } catch (error) {
-    console.error('Error creating message:', error.message);
-    return res.status(500).json({ success: false, message: 'Error creating message', error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
-// Lấy tất cả tin nhắn (phân trang)
-export const getAllMessages = async (req, res, next) => {
+export const getMessagesByOrder = async (req, res) => {
   try {
-    const { page = 1, limit = 10, order_id } = req.query;
-    const offset = (page - 1) * limit;
-    const whereClause = order_id ? { order_id } : {}; // Nếu có order_id thì lọc, không thì lấy tất cả
-    const messages = await models.Message.findAndCountAll({
-      where: whereClause,
-      limit: parseInt(limit),
-      offset: parseInt(offset),
+    const { orderId } = req.params;
+
+    const messages = await Message.findAll({
+      where: { order_id: orderId },
+      order: [['sent_at', 'ASC']],
     });
-    return res.status(200).json({
-      success: true,
-      total: messages.count,
-      pages: Math.ceil(messages.count / limit),
-      messages: messages.rows,
-    });
-  } catch (error) {
-    console.error('Error fetching messages:', error.message);
-    return res.status(500).json({ success: false, message: 'Error fetching messages', error: error.message });
-  }
-};
 
-// Lấy tin nhắn theo ID
-export const getMessageById = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const message = await models.Message.findByPk(id);
-    if (!message) {
-      return res.status(404).json({ success: false, message: 'Message not found' });
-    }
-    return res.status(200).json({ success: true, message });
+    res.status(200).json(messages);
   } catch (error) {
-    console.error('Error fetching message:', error.message);
-    return res.status(500).json({ success: false, message: 'Error fetching message', error: error.message });
-  }
-};
-
-// Xóa tin nhắn
-export const deleteMessage = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const message = await models.Message.findByPk(id);
-    if (!message) {
-      return res.status(404).json({ success: false, message: 'Message not found' });
-    }
-    await message.destroy();
-    console.log(`Message deleted: id=${id}`);
-    return res.status(200).json({ success: true, message: 'Message deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting message:', error.message);
-    return res.status(500).json({ success: false, message: 'Error deleting message', error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };

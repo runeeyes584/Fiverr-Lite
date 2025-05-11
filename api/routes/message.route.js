@@ -1,18 +1,36 @@
-import express from 'express';
-import {
-  createMessage,
-  deleteMessage,
-  getAllMessages,
-  getMessageById,
-} from '../controllers/message.controller.js';
-import requireAuth from '../middleware/requireAuth.js';
+import { sequelize } from "../models/Sequelize-mysql.js";
+import MessageModel from "../models/message.model.js";
 
-const router = express.Router();
+const Message = MessageModel(sequelize);
 
-// Chỉ giữ lại các API dùng để load/xóa tin nhắn
-router.get('/', getAllMessages);
-router.get('/:id', getMessageById);
-router.post('/', requireAuth, createMessage);
-router.delete('/:id', requireAuth, deleteMessage);
+export const createMessage = async (req, res) => {
+  try {
+    const { order_id, sender_clerk_id, receiver_clerk_id, message_content } = req.body;
 
-export default router;
+    const newMessage = await Message.create({
+      order_id,
+      sender_clerk_id,
+      receiver_clerk_id,
+      message_content,
+    });
+
+    res.status(201).json(newMessage);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getMessagesByOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    const messages = await Message.findAll({
+      where: { order_id: orderId },
+      order: [['sent_at', 'ASC']],
+    });
+
+    res.status(200).json(messages);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
