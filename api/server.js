@@ -1,4 +1,4 @@
-// ✅ Modified server.js with Socket.IO support for real-time chat
+
 import { Clerk } from "@clerk/clerk-sdk-node";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -7,8 +7,6 @@ import http from "http";
 import path from "path";
 import { Server } from "socket.io";
 import { sequelize } from "./models/Sequelize-mysql.js";
-
-// All your routes
 import adminLogRoute from "./routes/adminLog.route.js";
 import categoryRoute from "./routes/category.route.js";
 import companyRoute from "./routes/company.route.js";

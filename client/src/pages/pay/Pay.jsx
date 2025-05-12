@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
-import "./Pay.scss";
-import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
-import newRequest from "../../utils/newRequest";
+import { loadStripe } from "@stripe/stripe-js";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import CheckoutForm from "../../components/checkoutForm/CheckoutForm";
+import newRequest from "../../utils/newRequest";
+import "./Pay.scss";
 
 const stripePromise = loadStripe(
   "paste your public key"

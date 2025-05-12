@@ -1,4 +1,3 @@
-import React from "react";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import "./app.scss";
 import Footer from "./components/footer/Footer";

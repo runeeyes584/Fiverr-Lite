@@ -1,7 +1,9 @@
+import express from 'express';
 import { sequelize } from "../models/Sequelize-mysql.js";
 import MessageModel from "../models/message.model.js";
 
 const Message = MessageModel(sequelize);
+const router = express.Router();
 
 export const createMessage = async (req, res) => {
   try {
@@ -34,3 +36,5 @@ export const getMessagesByOrder = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export default router;
