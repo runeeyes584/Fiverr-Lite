@@ -1,100 +1,86 @@
+import { ProductCode, VNPay, VnpLocale, dateFormat, ignoreLogger } from 'vnpay';
 import { models } from '../models/Sequelize-mysql.js';
 
-// Tạo thanh toán
-export const createPayment = async (req, res, next) => {
+const vnpay = new VNPay({
+  tmnCode: 'JEOP71C7',
+  secureSecret: 'F48MKHH4U2ZRMTE5AZ47XHEO1UKRXHE5',
+  vnpayHost: 'https://sandbox.vnpayment.vn',
+  testMode: true,
+  hashAlgorithm: 'SHA512',
+  loggerFn: ignoreLogger
+});
+
+export const createVNPayUrl = async (req, res) => {
   try {
-    const { order_id, buyer_clerk_id, amount, payment_method, payment_status, transaction_id } = req.body;
-    if (!order_id || !buyer_clerk_id || !amount) {
-      return res.status(400).json({ success: false, message: 'Missing required fields: order_id, buyer_clerk_id, or amount' });
+    const { orderId, orderDescription, amount } = req.body || {};
+
+    const now = new Date();
+    const expire = new Date(now.getTime() + 15 * 60 * 1000);
+
+    const vnpayResponse = await vnpay.buildPaymentUrl({
+      vnp_Amount: amount || 100000,
+      vnp_IpAddr: req.ip || '127.0.0.1',
+      vnp_TxnRef: orderId || `ORDER_${Date.now()}`,
+      vnp_OrderInfo: orderDescription || 'Thanh toán đơn hàng mặc định',
+      vnp_OrderType: ProductCode.Other,
+      vnp_ReturnUrl: 'http://localhost:8800/api/payments/check-payment-vnpay',
+      vnp_Locale: VnpLocale.VN,
+      vnp_CreateDate: dateFormat(now),
+      vnp_ExpireDate: dateFormat(expire)
+    });
+    if (!vnpayResponse || typeof vnpayResponse !== 'string') {
+      return res.status(500).send('❌ VNPay không trả về URL');
     }
-    const payment = await models.Payment.create({
-      order_id,
-      buyer_clerk_id,
-      amount,
-      payment_method,
+
+    return res.status(201).json(vnpayResponse);
+  } catch (error) {
+    console.error('❌ Lỗi tạo QR:', error);
+    return res.status(500).send('Không tạo được QR thanh toán');
+  }
+};
+
+export const handleVNPayReturn = async (req, res) => {
+  try {
+    const result = await vnpay.verifyReturnUrl(req.query);
+    console.log("✅ Kết quả verifyReturnUrl:", result);
+    // Xử lý order_id
+    const orderId = Number(req.query.vnp_TxnRef);
+    if (isNaN(orderId)) {
+      console.error("❌ vnp_TxnRef không hợp lệ:", req.query.vnp_TxnRef);
+      return res.status(400).send("Order ID không hợp lệ");
+    }
+    // Truy vấn đơn hàng
+    const order = await models.Order.findByPk(orderId);
+    if (!order) {
+      return res.status(404).send("Không tìm thấy đơn hàng");
+    }
+    // Xác định trạng thái thanh toán
+    let payment_status;
+    if (result.isSuccess && req.query.vnp_ResponseCode === "00") {
+      payment_status = "completed";
+    } else if (!result.isVerified || req.query.vnp_ResponseCode !== "00") {
+      payment_status = "failed";
+    } else {
+      payment_status = "pending";
+    }
+    // Lưu thanh toán
+    await models.Payment.create({
+      order_id: orderId,
+      buyer_clerk_id: order.buyer_clerk_id,
+      amount: Number(req.query.vnp_Amount) / 100,
+      payment_method: req.query.vnp_BankCode || "vnpay",
       payment_status,
-      transaction_id,
+      transaction_id: req.query.vnp_TransactionNo,
     });
-    console.log(`Payment created: id=${payment.id}`);
-    return res.status(201).json({ success: true, message: 'Payment created successfully', payment });
-  } catch (error) {
-    console.error('Error creating payment:', error.message);
-    return res.status(500).json({ success: false, message: 'Error creating payment', error: error.message });
-  }
-};
-
-// Lấy tất cả thanh toán (phân trang)
-export const getAllPayments = async (req, res, next) => {
-  try {
-    const { page = 1, limit = 10, order_id, buyer_clerk_id } = req.query;
-    const offset = (page - 1) * limit;
-    const where = {};
-    if (order_id) where.order_id = order_id;
-    if (buyer_clerk_id) where.buyer_clerk_id = buyer_clerk_id;
-
-    const payments = await models.Payment.findAndCountAll({
-      where,
-      limit: parseInt(limit),
-      offset: parseInt(offset),
-    });
-    return res.status(200).json({
-      success: true,
-      total: payments.count,
-      pages: Math.ceil(payments.count / limit),
-      payments: payments.rows,
-    });
-  } catch (error) {
-    console.error('Error fetching payments:', error.message);
-    return res.status(500).json({ success: false, message: 'Error fetching payments', error: error.message });
-  }
-};
-
-// Lấy thanh toán theo ID
-export const getPaymentById = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const payment = await models.Payment.findByPk(id);
-    if (!payment) {
-      return res.status(404).json({ success: false, message: 'Payment not found' });
+    // Chuyển hướng theo kết quả
+    if (payment_status === "completed") {
+      return res.redirect("http://localhost:8800/payment-success");
+    } else {
+      return res.redirect("http://localhost:8800/payment-failed");
     }
-    return res.status(200).json({ success: true, payment });
   } catch (error) {
-    console.error('Error fetching payment:', error.message);
-    return res.status(500).json({ success: false, message: 'Error fetching payment', error: error.message });
-  }
-};
-
-// Cập nhật thanh toán
-export const updatePayment = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const { payment_status, transaction_id } = req.body;
-    const payment = await models.Payment.findByPk(id);
-    if (!payment) {
-      return res.status(404).json({ success: false, message: 'Payment not found' });
-    }
-    await payment.update({ payment_status, transaction_id });
-    console.log(`Payment updated: id=${id}`);
-    return res.status(200).json({ success: true, message: 'Payment updated successfully', payment });
-  } catch (error) {
-    console.error('Error updating payment:', error.message);
-    return res.status(500).json({ success: false, message: 'Error updating payment', error: error.message });
-  }
-};
-
-// Xóa thanh toán
-export const deletePayment = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const payment = await models.Payment.findByPk(id);
-    if (!payment) {
-      return res.status(404).json({ success: false, message: 'Payment not found' });
-    }
-    await payment.destroy();
-    console.log(`Payment deleted: id=${id}`);
-    return res.status(200).json({ success: true, message: 'Payment deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting payment:', error.message);
-    return res.status(500).json({ success: false, message: 'Error deleting payment', error: error.message });
+    console.error("❌ Lỗi xác minh callback VNPay:", error);
+    console.error("🔍 Query từ VNPay:", req.query);
+    return res.status(500).send("Lỗi callback VNPay");
   }
 };

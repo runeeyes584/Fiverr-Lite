@@ -59,7 +59,13 @@ app.use("/api/users", userRoute);
 app.use(express.json());
 
 // Routes
+app.get('/payment-success', (req, res) => {
+  res.send('<h1>✅ Thanh toán thành công! Cảm ơn bạn đã sử dụng dịch vụ.</h1>');
+});
 
+app.get('/payment-failed', (req, res) => {
+  res.send('<h1>❌ Thanh toán thất bại! Vui lòng thử lại hoặc liên hệ hỗ trợ.</h1>');
+});
 app.use("/api/adminLog", adminLogRoute);
 app.use("/api/categories", categoryRoute);
 app.use("/api/companies", companyRoute);
