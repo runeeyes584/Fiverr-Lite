@@ -42,7 +42,6 @@ export const createVNPayUrl = async (req, res) => {
 export const handleVNPayReturn = async (req, res) => {
   try {
     const result = await vnpay.verifyReturnUrl(req.query);
-    console.log("✅ Kết quả verifyReturnUrl:", result);
     // Xử lý order_id
     const orderId = Number(req.query.vnp_TxnRef);
     if (isNaN(orderId)) {
@@ -79,8 +78,6 @@ export const handleVNPayReturn = async (req, res) => {
       return res.redirect("http://localhost:8800/payment-failed");
     }
   } catch (error) {
-    console.error("❌ Lỗi xác minh callback VNPay:", error);
-    console.error("🔍 Query từ VNPay:", req.query);
     return res.status(500).send("Lỗi callback VNPay");
   }
 };
