@@ -1,35 +1,3 @@
-
-
-// import { sendMessage } from "../controllers/message.controller.js";
-
-// const messageSocketHandler = (io) => {
-//   io.on("connection", (socket) => {
-//     console.log("🔌 Client connected:", socket.id);
-
-//     socket.on("joinOrder", ({ orderId }) => {
-//       socket.join(`order_${orderId}`);
-//       console.log(`Client ${socket.id} joined room order_${orderId}`);
-//     });
-
-//     socket.on("sendMessage", async (messageData, callback) => {
-//       try {
-//         const newMessage = await sendMessage(messageData); // Sử dụng controller
-//         io.to(`order_${messageData.order_id}`).emit("newMessage", newMessage);
-//         callback({ success: true, message: newMessage });
-//       } catch (error) {
-//         console.error("Error sending message:", error.message);
-//         callback({ success: false, error: error.message });
-//       }
-//     });
-
-//     socket.on("disconnect", () => {
-//       console.log("Client disconnected:", socket.id);
-//     });
-//   });
-// };
-
-// export default messageSocketHandler;
-
 import { sendMessage } from "../controllers/message.controller.js";
 
 const messageSocketHandler = (io) => {
