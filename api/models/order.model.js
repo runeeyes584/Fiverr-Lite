@@ -57,6 +57,10 @@ const Order = (sequelize) =>
         type: DataTypes.DATE,
         allowNull: true,
       },
+      // payment_intent: {
+      //   type: DataTypes.STRING(255),
+      //   allowNull: true,
+      // },
     },
     {
       tableName: "orders",
@@ -64,6 +68,7 @@ const Order = (sequelize) =>
       indexes: [
         { fields: ["buyer_clerk_id"] },
         { fields: ["seller_clerk_id"] },
+        { fields: ["gig_id"] },
       ],
     }
   );

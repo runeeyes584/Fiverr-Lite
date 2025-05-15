@@ -17,6 +17,15 @@ const Message = (sequelize) =>
           key: "id",
         },
       },
+      ticket_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+      },
+      ticket_status: {
+        type: DataTypes.ENUM("open", "closed"),
+        allowNull: false,
+        defaultValue: "open",
+      },
       sender_clerk_id: {
         type: DataTypes.STRING(255),
         allowNull: false,
@@ -42,10 +51,19 @@ const Message = (sequelize) =>
         allowNull: false,
         defaultValue: DataTypes.NOW,
       },
+      is_read: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
     },
     {
       tableName: "messages",
       timestamps: false,
+      indexes: [
+        { fields: ["order_id"] }, // Thêm index để tối ưu truy vấn
+        { fields: ["ticket_id"] },
+      ],
     }
   );
 

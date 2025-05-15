@@ -114,3 +114,24 @@ export const deleteGig = async (req, res, next) => {
     return res.status(500).json({ success: false, message: 'Error deleting gig', error: error.message });
   }
 };
+
+// Tìm kiếm gig
+export const searchGigs = async (req, res, next) => {
+  try {
+    const { keyword } = req.query;
+    if (!keyword) {
+      return res.status(400).json({ success: false, message: 'Missing required field: keyword' });
+    }
+    const gigs = await models.Gig.findAll({
+      where: {
+        title: {
+          [Op.like]: `%${keyword}%`,
+        },
+      },
+    });
+    return res.status(200).json({ success: true, gigs });
+  } catch (error) {
+    console.error('Error searching gigs:', error.message);
+    return res.status(500).json({ success: false, message: 'Error searching gigs', error: error.message });
+  }
+};

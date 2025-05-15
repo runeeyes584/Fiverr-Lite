@@ -1,40 +1,21 @@
-import express from 'express';
-import { sequelize } from "../models/Sequelize-mysql.js";
-import MessageModel from "../models/message.model.js";
+import express from "express";
+import { getMessages, sendMessage, markMessageAsRead, getTickets, updateTicketStatus } from "../controllers/message.controller.js";
 
-const Message = MessageModel(sequelize);
 const router = express.Router();
 
-export const createMessage = async (req, res) => {
-  try {
-    const { order_id, sender_clerk_id, receiver_clerk_id, message_content } = req.body;
+// Lấy danh sách tin nhắn theo order_id
+router.get("/", getMessages);
 
-    const newMessage = await Message.create({
-      order_id,
-      sender_clerk_id,
-      receiver_clerk_id,
-      message_content,
-    });
+// Gửi tin nhắn mới
+router.post("/", sendMessage);
 
-    res.status(201).json(newMessage);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
+// Đánh dấu tin nhắn là đã xem
+router.patch("/:id/read", markMessageAsRead);
 
-export const getMessagesByOrder = async (req, res) => {
-  try {
-    const { orderId } = req.params;
+// Lấy danh sách ticket
+router.get("/tickets", getTickets);
 
-    const messages = await Message.findAll({
-      where: { order_id: orderId },
-      order: [['sent_at', 'ASC']],
-    });
-
-    res.status(200).json(messages);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
+// Cập nhật trạng thái ticket
+router.patch("/tickets", updateTicketStatus);
 
 export default router;

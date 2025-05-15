@@ -33,19 +33,22 @@ import skillsRoute from "./routes/skills.route.js";
 import userRoute from "./routes/user.route.js";
 import userSearchHistoryRoute from "./routes/userSearchHistory.route.js";
 import messageSocketHandler from "./socket/messageSocket.js";
+import { initSocket } from "./controllers/message.controller.js";
 
 // .env
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
 const app = express();
-const clerk = new Clerk({ apiKey: process.env.CLERK_SECRET_KEY });
+const clerk = new Clerk({ secretKey: process.env.CLERK_SECRET_KEY });
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "https://*.ngrok-free.app"],
     credentials: true,
   },
 });
+
+
 
 // Sequelize connection check
 sequelize.authenticate()
@@ -93,10 +96,12 @@ app.use((err, req, res, next) => {
 });
 
 // Socket handler
+initSocket(io);
 messageSocketHandler(io);
 
 // Sync database & start server
-sequelize.sync({ force: false })
+sequelize
+  .sync({ force: false })
   .then(() => {
     console.log("Database synced successfully");
     server.listen(8800, () => {
